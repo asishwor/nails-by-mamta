@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     Return a JSON array containing ONLY the string IDs of the recommended services. Do not include services that are completely irrelevant.
     `
 
-    const { object } = await safeGenerateObject({
+    const result = await safeGenerateObject({
       prompt,
       schema: z.object({
         recommendedServiceIds: z.array(z.string())
@@ -32,7 +32,11 @@ export async function POST(request: Request) {
       system: "You are a helpful AI assistant that matches user queries to service IDs."
     })
 
-    return NextResponse.json({ recommendedIds: object.recommendedServiceIds })
+    if (!result) {
+      return NextResponse.json({ error: 'Failed to generate recommendations' }, { status: 500 })
+    }
+
+    return NextResponse.json({ recommendedIds: result.object.recommendedServiceIds })
   } catch (error: any) {
     console.error('AI Search Error:', error)
     return NextResponse.json({ error: 'Failed to process search' }, { status: 500 })
