@@ -1,9 +1,10 @@
-import Link from 'next/link'
-import { Sparkles } from 'lucide-react'
-import { prisma } from '@/utils/prisma'
 import GalleryControls from '@/components/gallery/GalleryControls'
 import GridView from '@/components/gallery/GridView'
 import SliderView from '@/components/gallery/SliderView'
+import { Logo } from '@/components/Logo'
+import { prisma } from '@/utils/prisma'
+import { Sparkles } from 'lucide-react'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,7 +18,7 @@ export default async function GalleryPage({
   searchParams: Promise<SearchParams>
 }) {
   const { view } = await searchParams
-  const currentView = (view === 'grid' || view === 'slider') ? view : 'slider'
+  const currentView = (view === 'grid' || view === 'slider') ? view : 'grid'
 
   // Slider fetches all (up to 100), Grid fetches 12 per page initially
   const limit = currentView === 'slider' ? 100 : 12
@@ -42,12 +43,7 @@ export default async function GalleryPage({
       {/* Header */}
       <nav className="flex items-center justify-between p-6 md:px-12 bg-white/50 backdrop-blur-xl border-b border-white/20 sticky top-0 z-50">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="bg-primary/10 p-2 rounded-xl group-hover:bg-primary/20 transition-colors">
-            <Sparkles className="w-5 h-5 text-primary" />
-          </div>
-          <span className="font-heading text-2xl tracking-wide text-foreground">
-            <span className="italic font-light">NailsBy</span>Mamta
-          </span>
+          <Logo height={100} width={100} />
         </Link>
         <Link href="/" className="text-[12px] font-semibold text-foreground hover:text-primary transition-colors tracking-[0.15em] uppercase">
           Back to Home
@@ -64,7 +60,7 @@ export default async function GalleryPage({
           <p className="text-foreground/70 mt-4 max-w-lg mx-auto text-lg mb-8">
             A curated collection of our finest work. Scroll through to find inspiration for your next visit.
           </p>
-          
+
           <div className="max-w-xl mx-auto flex justify-center">
             <GalleryControls currentView={currentView} />
           </div>

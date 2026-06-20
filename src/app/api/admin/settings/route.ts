@@ -15,7 +15,7 @@ export async function PUT(request: Request) {
     const body = await request.json()
     const { 
       id, workingDays, startTime, endTime, weeklySchedule, bufferTimeMinutes,
-      contactPhone, contactLocation, googleMapsLink 
+      contactPhone, contactLocation, googleMapsLink, socialLinks
     } = body
 
     if (!id) {
@@ -26,7 +26,7 @@ export async function PUT(request: Request) {
       where: { id },
       data: { 
         workingDays, startTime, endTime, weeklySchedule, bufferTimeMinutes,
-        contactPhone, contactLocation, googleMapsLink 
+        contactPhone, contactLocation, googleMapsLink, socialLinks
       }
     })
 

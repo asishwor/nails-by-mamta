@@ -130,7 +130,7 @@ export default function ServicesPage() {
               services.map((service) => (
                 <TableRow key={service.id}>
                   <TableCell className="font-medium">{service.name}</TableCell>
-                  <TableCell>${service.price}</TableCell>
+                  <TableCell>Rs. {service.price}</TableCell>
                   <TableCell>{service.durationMinutes} mins</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${service.isActive ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}`}>
@@ -164,7 +164,7 @@ export default function ServicesPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="price">Price ($)</Label>
+                <Label htmlFor="price">Price (Rs.)</Label>
                 <Input type="number" id="price" required min="0" step="0.01" value={formData.price} onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })} />
               </div>
               <div className="grid gap-2">

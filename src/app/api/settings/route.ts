@@ -16,7 +16,8 @@ export async function GET() {
       weeklySchedule: settings.weeklySchedule,
       contactPhone: settings.contactPhone,
       contactLocation: settings.contactLocation,
-      googleMapsLink: settings.googleMapsLink
+      googleMapsLink: settings.googleMapsLink,
+      socialLinks: settings.socialLinks
     }
     return NextResponse.json({ settings: publicSettings })
   } catch (error: any) {

@@ -31,6 +31,15 @@ export default function SettingsPage() {
               };
             }
           }
+          if (!s.socialLinks) {
+            s.socialLinks = {
+              instagram: { isActive: true, url: '', label: '@nailbymamta' },
+              facebook: { isActive: false, url: '', label: '' },
+              tiktok: { isActive: false, url: '', label: '' },
+              twitter: { isActive: false, url: '', label: '' },
+              youtube: { isActive: false, url: '', label: '' },
+            }
+          }
           setSettings(s)
         }
         setIsLoading(false)
@@ -62,6 +71,28 @@ export default function SettingsPage() {
         [field]: value
       }
       return { ...prev, weeklySchedule: schedule }
+    })
+  }
+
+  const handleSocialToggle = (platform: string) => {
+    setSettings((prev: any) => {
+      const social = { ...prev.socialLinks }
+      social[platform] = {
+        ...(social[platform] || { url: '', label: '' }),
+        isActive: !social[platform]?.isActive
+      }
+      return { ...prev, socialLinks: social }
+    })
+  }
+
+  const handleSocialChange = (platform: string, field: 'url' | 'label', value: string) => {
+    setSettings((prev: any) => {
+      const social = { ...prev.socialLinks }
+      social[platform] = {
+        ...(social[platform] || { isActive: false }),
+        [field]: value
+      }
+      return { ...prev, socialLinks: social }
     })
   }
 
@@ -226,6 +257,58 @@ export default function SettingsPage() {
                 placeholder="https://maps.app.goo.gl/..."
               />
             </div>
+          </div>
+        </div>
+
+        <div className="pt-6 border-t space-y-6">
+          <h3 className="text-lg font-medium">Social Links</h3>
+          <div className="space-y-4">
+            {['instagram', 'facebook', 'tiktok', 'twitter', 'youtube'].map((platform) => {
+              const config = (settings.socialLinks?.[platform] as any) || { isActive: false, url: '', label: '' }
+              const isActive = Boolean(config.isActive)
+              return (
+                <div key={platform} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border rounded-lg bg-slate-50 dark:bg-zinc-800/50">
+                  <div className="w-32 capitalize font-medium">
+                    <Button 
+                      type="button" 
+                      variant={isActive ? 'default' : 'outline'}
+                      className="w-full justify-start capitalize"
+                      onClick={() => handleSocialToggle(platform)}
+                    >
+                      {isActive ? '✓ ' : ''}{platform}
+                    </Button>
+                  </div>
+                  
+                  {isActive && (
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
+                      <div className="flex-1 w-full space-y-1">
+                        <Label htmlFor={`${platform}-label`} className="text-xs text-slate-500">Display Label</Label>
+                        <Input 
+                          id={`${platform}-label`} 
+                          value={config.label || ''} 
+                          onChange={e => handleSocialChange(platform, 'label', e.target.value)} 
+                          placeholder="@handle or Name"
+                        />
+                      </div>
+                      <div className="flex-[2] w-full space-y-1">
+                        <Label htmlFor={`${platform}-url`} className="text-xs text-slate-500">Profile URL</Label>
+                        <Input 
+                          id={`${platform}-url`} 
+                          value={config.url || ''} 
+                          onChange={e => handleSocialChange(platform, 'url', e.target.value)} 
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {!isActive && (
+                    <div className="flex-1 text-slate-400 italic text-sm py-2">
+                      Disabled — click to enable
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
 

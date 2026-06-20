@@ -255,7 +255,7 @@ export function BookingModal({ isOpen, onClose, service }: BookingModalProps) {
               >
                 <form id="booking-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
                   <div className="p-4 bg-muted/50 rounded-lg text-sm flex flex-col gap-1 mb-2">
-                    <p className="font-medium">{service.name} (${service.price})</p>
+                    <p className="font-medium">{service.name} (Rs. {service.price})</p>
                     <p className="text-muted-foreground flex items-center gap-2">
                       <CalendarIcon className="w-3.5 h-3.5" />
                       {date ? format(date, 'MMMM d, yyyy') : ''} at {selectedTime}
