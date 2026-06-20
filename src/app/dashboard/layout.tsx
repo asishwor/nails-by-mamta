@@ -1,11 +1,11 @@
-import { redirect } from 'next/navigation'
-import { getServerSession } from 'next-auth'
+import { Button } from '@/components/ui/button'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/utils/prisma'
-import Link from 'next/link'
+import { LayoutDashboard, User as UserIcon } from 'lucide-react'
+import { getServerSession } from 'next-auth'
 import Image from 'next/image'
-import { Button } from '@/components/ui/button'
-import { LayoutDashboard, Sparkles, User as UserIcon } from 'lucide-react'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 export default async function DashboardLayout({
   children,
@@ -39,8 +39,9 @@ export default async function DashboardLayout({
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-primary/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <Image src="/logo.png" alt="Nail By Mamta Logo" width={100} height={34} className="object-contain" />
+            <Image src="/logo.png" alt="Nails By Mamta Logo" width={100} height={34} className="object-contain" />
           </Link>
+
           <div className="flex items-center gap-4">
             <Link href="/dashboard">
               <Button variant="ghost" className="text-sm font-medium">

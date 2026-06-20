@@ -101,6 +101,9 @@ model AdminSettings {
   googleMapsLink    String   @default("https://maps.app.goo.gl/i9AVptRemBg1ZNnj6")
   passwordHash      String?  // Hashed admin password
   socialLinks       Json?    // Detailed links: { "instagram": { isActive: true, url: "" }, ... }
+  googleClientId    String?
+  googleIosClientId String?
+  googleAndroidClientId String?
   createdAt         DateTime @default(now())
 }
 

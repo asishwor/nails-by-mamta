@@ -1,6 +1,6 @@
 #!/bin/bash
 # deploy.sh
-# A quick one-command deploy script for Nail By Mamta
+# A quick one-command deploy script for Nails By Mamta
 
 echo "🚀 Preparing to deploy to Vercel..."
 

@@ -1,11 +1,11 @@
 'use client'
 
-import { ReactNode } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { usePathname } from 'next/navigation'
-import { CalendarDays, Scissors, Settings, LogOut, LayoutDashboard, KeyRound, Image as ImageIcon } from 'lucide-react'
+import { CalendarDays, Image as ImageIcon, KeyRound, LayoutDashboard, LogOut, Scissors, Settings } from 'lucide-react'
 import { signOut } from 'next-auth/react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { ReactNode } from 'react'
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
@@ -28,21 +28,20 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className="w-64 bg-white dark:bg-zinc-900 border-r shadow-sm hidden md:flex flex-col">
         <div className="p-6 border-b flex items-center justify-center">
-          <Image src="/logo.png" alt="Nail By Mamta Logo" width={140} height={48} className="object-contain" />
+          <Image src="/logo.png" alt="Nails By Mamta Logo" width={140} height={48} className="object-contain" />
         </div>
         <nav className="flex-1 p-4 space-y-2">
           {navLinks.map((link) => {
             const Icon = link.icon
             const isActive = pathname === link.href
             return (
-              <Link 
+              <Link
                 key={link.href}
-                href={link.href} 
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive 
-                    ? 'bg-rose-50 text-rose-600 dark:bg-zinc-800 dark:text-white font-semibold' 
+                href={link.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
+                    ? 'bg-rose-50 text-rose-600 dark:bg-zinc-800 dark:text-white font-semibold'
                     : 'text-slate-600 hover:bg-rose-50 hover:text-rose-600 dark:text-slate-400 dark:hover:bg-zinc-800 dark:hover:text-white font-medium'
-                }`}
+                  }`}
               >
                 <Icon className="w-5 h-5" />
                 <span>{link.label}</span>

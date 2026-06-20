@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<any>(null)
@@ -33,7 +33,7 @@ export default function SettingsPage() {
           }
           if (!s.socialLinks) {
             s.socialLinks = {
-              instagram: { isActive: true, url: '', label: '@nailbymamta' },
+              instagram: { isActive: true, url: '', label: '@nailsbymamta' },
               facebook: { isActive: false, url: '', label: '' },
               tiktok: { isActive: false, url: '', label: '' },
               twitter: { isActive: false, url: '', label: '' },
@@ -164,12 +164,12 @@ export default function SettingsPage() {
             {daysOfWeek.map((day, index) => {
               const dayStr = index.toString()
               const dayConfig = settings.weeklySchedule?.[dayStr] || { isActive: false, startTime: '', endTime: '' }
-              
+
               return (
                 <div key={day} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border rounded-lg bg-slate-50 dark:bg-zinc-800/50">
                   <div className="w-32">
-                    <Button 
-                      type="button" 
+                    <Button
+                      type="button"
                       variant={dayConfig.isActive ? 'default' : 'outline'}
                       className="w-full justify-start"
                       onClick={() => handleDayToggle(index)}
@@ -177,29 +177,29 @@ export default function SettingsPage() {
                       {dayConfig.isActive ? '✓ ' : ''}{day}
                     </Button>
                   </div>
-                  
+
                   {dayConfig.isActive && (
                     <div className="flex items-center gap-4 flex-1">
                       <div className="flex items-center gap-2">
                         <Label htmlFor={`start-${index}`} className="sr-only">Start Time</Label>
-                        <Input 
-                          id={`start-${index}`} 
-                          type="time" 
+                        <Input
+                          id={`start-${index}`}
+                          type="time"
                           step="1"
-                          value={dayConfig.startTime} 
-                          onChange={e => handleTimeChange(index, 'startTime', e.target.value)} 
+                          value={dayConfig.startTime}
+                          onChange={e => handleTimeChange(index, 'startTime', e.target.value)}
                           className="w-32"
                         />
                       </div>
                       <span className="text-slate-400">to</span>
                       <div className="flex items-center gap-2">
                         <Label htmlFor={`end-${index}`} className="sr-only">End Time</Label>
-                        <Input 
-                          id={`end-${index}`} 
-                          type="time" 
+                        <Input
+                          id={`end-${index}`}
+                          type="time"
                           step="1"
-                          value={dayConfig.endTime} 
-                          onChange={e => handleTimeChange(index, 'endTime', e.target.value)} 
+                          value={dayConfig.endTime}
+                          onChange={e => handleTimeChange(index, 'endTime', e.target.value)}
                           className="w-32"
                         />
                       </div>
@@ -218,12 +218,12 @@ export default function SettingsPage() {
 
         <div className="space-y-2">
           <Label htmlFor="buffer">Buffer Time (minutes between appointments)</Label>
-          <Input 
-            id="buffer" 
-            type="number" 
+          <Input
+            id="buffer"
+            type="number"
             min="0"
-            value={settings.bufferTimeMinutes} 
-            onChange={e => setSettings({ ...settings, bufferTimeMinutes: parseInt(e.target.value) })} 
+            value={settings.bufferTimeMinutes}
+            onChange={e => setSettings({ ...settings, bufferTimeMinutes: parseInt(e.target.value) })}
           />
         </div>
 
@@ -232,28 +232,28 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="contactPhone">WhatsApp Phone Number</Label>
-              <Input 
-                id="contactPhone" 
-                value={settings.contactPhone || ''} 
-                onChange={e => setSettings({ ...settings, contactPhone: e.target.value })} 
+              <Input
+                id="contactPhone"
+                value={settings.contactPhone || ''}
+                onChange={e => setSettings({ ...settings, contactPhone: e.target.value })}
                 placeholder="+977 984010613"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="contactLocation">Location Name / Address</Label>
-              <Input 
-                id="contactLocation" 
-                value={settings.contactLocation || ''} 
-                onChange={e => setSettings({ ...settings, contactLocation: e.target.value })} 
+              <Input
+                id="contactLocation"
+                value={settings.contactLocation || ''}
+                onChange={e => setSettings({ ...settings, contactLocation: e.target.value })}
                 placeholder="Boudha, Kathmandu"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="googleMapsLink">Google Maps Link</Label>
-              <Input 
-                id="googleMapsLink" 
-                value={settings.googleMapsLink || ''} 
-                onChange={e => setSettings({ ...settings, googleMapsLink: e.target.value })} 
+              <Input
+                id="googleMapsLink"
+                value={settings.googleMapsLink || ''}
+                onChange={e => setSettings({ ...settings, googleMapsLink: e.target.value })}
                 placeholder="https://maps.app.goo.gl/..."
               />
             </div>
@@ -269,8 +269,8 @@ export default function SettingsPage() {
               return (
                 <div key={platform} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border rounded-lg bg-slate-50 dark:bg-zinc-800/50">
                   <div className="w-32 capitalize font-medium">
-                    <Button 
-                      type="button" 
+                    <Button
+                      type="button"
                       variant={isActive ? 'default' : 'outline'}
                       className="w-full justify-start capitalize"
                       onClick={() => handleSocialToggle(platform)}
@@ -278,24 +278,24 @@ export default function SettingsPage() {
                       {isActive ? '✓ ' : ''}{platform}
                     </Button>
                   </div>
-                  
+
                   {isActive && (
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 flex-1">
                       <div className="flex-1 w-full space-y-1">
                         <Label htmlFor={`${platform}-label`} className="text-xs text-slate-500">Display Label</Label>
-                        <Input 
-                          id={`${platform}-label`} 
-                          value={config.label || ''} 
-                          onChange={e => handleSocialChange(platform, 'label', e.target.value)} 
+                        <Input
+                          id={`${platform}-label`}
+                          value={config.label || ''}
+                          onChange={e => handleSocialChange(platform, 'label', e.target.value)}
                           placeholder="@handle or Name"
                         />
                       </div>
                       <div className="flex-[2] w-full space-y-1">
                         <Label htmlFor={`${platform}-url`} className="text-xs text-slate-500">Profile URL</Label>
-                        <Input 
-                          id={`${platform}-url`} 
-                          value={config.url || ''} 
-                          onChange={e => handleSocialChange(platform, 'url', e.target.value)} 
+                        <Input
+                          id={`${platform}-url`}
+                          value={config.url || ''}
+                          onChange={e => handleSocialChange(platform, 'url', e.target.value)}
                           placeholder="https://..."
                         />
                       </div>
@@ -312,6 +312,60 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        <div className="pt-6 border-t space-y-6">
+          <h3 className="text-lg font-medium">Google OAuth Configuration (for Mobile App)</h3>
+          <p className="text-sm text-slate-500">
+            Configure Google OAuth Client IDs created in the Google Cloud Console. These public client IDs are used by the mobile app to initiate Google Sign-in.
+          </p>
+          <div className="grid grid-cols-1 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="googleClientId">Google Web/Expo Go Client ID</Label>
+              <Input
+                id="googleClientId"
+                value={settings.googleClientId || ''}
+                onChange={e => setSettings({ ...settings, googleClientId: e.target.value })}
+                placeholder="1234567890-xxxxxx.apps.googleusercontent.com"
+              />
+              <p className="text-xs text-slate-500">
+                Used for Web client and Expo Go development. Create a <strong>Web application</strong> client ID.{" "}
+                <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="text-pink-600 dark:text-pink-400 hover:underline font-medium">
+                  Create in Google Cloud Console →
+                </a>
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="googleIosClientId">Google iOS Client ID (Native Bundle)</Label>
+              <Input
+                id="googleIosClientId"
+                value={settings.googleIosClientId || ''}
+                onChange={e => setSettings({ ...settings, googleIosClientId: e.target.value })}
+                placeholder="1234567890-yyyyyy.apps.googleusercontent.com"
+              />
+              <p className="text-xs text-slate-500">
+                Used for native iOS app builds. Create an <strong>iOS</strong> client ID with Bundle ID <code>com.mamatadhakal.nailapp</code>.{" "}
+                <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="text-pink-600 dark:text-pink-400 hover:underline font-medium">
+                  Create in Google Cloud Console →
+                </a>
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="googleAndroidClientId">Google Android Client ID (Native Package)</Label>
+              <Input
+                id="googleAndroidClientId"
+                value={settings.googleAndroidClientId || ''}
+                onChange={e => setSettings({ ...settings, googleAndroidClientId: e.target.value })}
+                placeholder="1234567890-zzzzzz.apps.googleusercontent.com"
+              />
+              <p className="text-xs text-slate-500">
+                Used for native Android app builds. Create an <strong>Android</strong> client ID with Package Name <code>com.mamatadhakal.nailapp</code>.{" "}
+                <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="text-pink-600 dark:text-pink-400 hover:underline font-medium">
+                  Create in Google Cloud Console →
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="pt-6 border-t">
           <Button onClick={handleSave} disabled={isSaving}>
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -325,9 +379,9 @@ export default function SettingsPage() {
         <form onSubmit={handlePasswordChange} className="bg-white dark:bg-zinc-900 border rounded-xl p-6 shadow-sm space-y-6">
           <div className="space-y-2 max-w-sm">
             <Label htmlFor="currentPwd">Current Password</Label>
-            <Input 
-              id="currentPwd" 
-              type="password" 
+            <Input
+              id="currentPwd"
+              type="password"
               required
               value={passwords.current}
               onChange={e => setPasswords({ ...passwords, current: e.target.value })}
@@ -335,9 +389,9 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-2 max-w-sm">
             <Label htmlFor="newPwd">New Password</Label>
-            <Input 
-              id="newPwd" 
-              type="password" 
+            <Input
+              id="newPwd"
+              type="password"
               required
               minLength={6}
               value={passwords.new}
@@ -346,9 +400,9 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-2 max-w-sm">
             <Label htmlFor="confirmPwd">Confirm New Password</Label>
-            <Input 
-              id="confirmPwd" 
-              type="password" 
+            <Input
+              id="confirmPwd"
+              type="password"
               required
               minLength={6}
               value={passwords.confirm}

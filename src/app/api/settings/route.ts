@@ -17,7 +17,10 @@ export async function GET() {
       contactPhone: settings.contactPhone,
       contactLocation: settings.contactLocation,
       googleMapsLink: settings.googleMapsLink,
-      socialLinks: settings.socialLinks
+      socialLinks: settings.socialLinks,
+      googleClientId: settings.googleClientId,
+      googleIosClientId: settings.googleIosClientId,
+      googleAndroidClientId: settings.googleAndroidClientId
     }
     return NextResponse.json({ settings: publicSettings })
   } catch (error: any) {
