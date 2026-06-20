@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2, Save } from 'lucide-react'
 
 export default function ProfilePage() {
-  const [formData, setFormData] = useState({ phone: '', address: '' })
+  const [formData, setFormData] = useState({ name: '', phone: '', address: '' })
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -18,6 +18,7 @@ export default function ProfilePage() {
       .then(data => {
         if (data.user) {
           setFormData({
+            name: data.user.name || '',
             phone: data.user.phone || '',
             address: data.user.address || ''
           })
@@ -70,6 +71,17 @@ export default function ProfilePage() {
 
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-primary/10">
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="name">Full Name</Label>
+            <Input
+              id="name"
+              type="text"
+              required
+              value={formData.name}
+              onChange={e => setFormData({ ...formData, name: e.target.value })}
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
             <Input

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/utils/prisma'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { LayoutDashboard, Sparkles, User as UserIcon } from 'lucide-react'
 
@@ -38,10 +39,7 @@ export default async function DashboardLayout({
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-primary/10 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="flex gap-1.5 bg-primary/10 p-2 rounded-full">
-              <Sparkles className="w-4 h-4 text-primary" />
-            </div>
-            <span className="font-heading text-xl tracking-tight">Nails By Mamta</span>
+            <Image src="/logo.png" alt="Nail By Mamta Logo" width={100} height={34} className="object-contain" />
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/dashboard">

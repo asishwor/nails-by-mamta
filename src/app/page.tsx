@@ -1,11 +1,12 @@
 'use client'
 
 import { BookingModal } from '@/components/booking/BookingModal'
+import { Logo } from '@/components/Logo'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { motion, Variants } from 'framer-motion'
-import { Clock, MapPin, Phone, ShieldCheck, Sparkles, Menu, X } from 'lucide-react'
+import { Clock, MapPin, Menu, Phone, ShieldCheck, Sparkles, X } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -44,7 +45,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const [recommendedIds, setRecommendedIds] = useState<string[] | null>(null)
-  
+
   const [galleryImages, setGalleryImages] = useState<any[]>([])
 
   useEffect(() => {
@@ -121,25 +122,21 @@ export default function Home() {
     setIsModalOpen(true)
   }
 
-  const displayedServices = recommendedIds 
+  const displayedServices = recommendedIds
     ? services.filter(s => recommendedIds.includes(s.id))
     : services;
 
   return (
     <main className="min-h-screen bg-[#FAF5EE] font-sans text-[#16110F]">
       {/* Premium Navigation Bar */}
+
       <motion.nav
         initial={{ y: -40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="fixed top-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-5xl z-50 flex items-center justify-between px-6 py-4 bg-background/80 backdrop-blur-md border border-primary/20 rounded-full shadow-lg shadow-primary/5"
+        className="fixed top-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-5xl z-50 flex items-center justify-between px-6 bg-background/80 backdrop-blur-md border border-primary/20 rounded-full shadow-lg shadow-primary/5"
       >
-        <div className="flex items-center gap-3">
-          <div className="flex gap-1.5 bg-primary/10 p-2 rounded-full">
-            <Sparkles className="w-4 h-4 text-primary" />
-          </div>
-          <span className="font-heading text-xl md:text-2xl tracking-tight text-foreground">Nails By Mamta</span>
-        </div>
+        <Logo height={120} width={120} />
 
         <div className="hidden md:flex items-center gap-8 bg-primary/5 px-6 py-2 rounded-full border border-primary/10">
           <button
@@ -189,7 +186,7 @@ export default function Home() {
         </div>
 
         {/* Mobile Menu Toggle */}
-        <button 
+        <button
           className="md:hidden p-2 text-foreground"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
@@ -225,17 +222,17 @@ export default function Home() {
           >
             Gallery
           </Link>
-          
+
           <div className="h-px w-full bg-primary/10"></div>
-          
+
           <div className="flex flex-col gap-3">
             {session ? (
               <>
-              <Link href={(session.user as any)?.role === 'ADMIN' ? '/admin' : '/dashboard'} onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="outline" className="w-full rounded-full text-[12px] tracking-[0.1em] uppercase border-primary/20 hover:bg-primary/5">
-                  Dashboard
-                </Button>
-              </Link>
+                <Link href={(session.user as any)?.role === 'ADMIN' ? '/admin' : '/dashboard'} onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full rounded-full text-[12px] tracking-[0.1em] uppercase border-primary/20 hover:bg-primary/5">
+                    Dashboard
+                  </Button>
+                </Link>
                 <Button
                   onClick={() => {
                     setIsMobileMenuOpen(false)
@@ -392,13 +389,13 @@ export default function Home() {
               </p>
               <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl text-foreground">Signature Services</h2>
             </div>
-            
+
             {/* AI Semantic Search */}
             <div className="w-full lg:w-96 bg-white/50 backdrop-blur-md border border-primary/20 p-2 rounded-2xl shadow-sm">
               <form onSubmit={handleSearch} className="flex gap-2">
-                <Input 
-                  type="text" 
-                  placeholder="E.g. I want shiny, long nails for a party..." 
+                <Input
+                  type="text"
+                  placeholder="E.g. I want shiny, long nails for a party..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="border-none bg-transparent shadow-none focus-visible:ring-0 text-sm"
@@ -619,10 +616,7 @@ export default function Home() {
       <footer className="bg-white text-foreground py-20 px-6 md:px-12 border-t border-primary/10">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-1">
-            <div className="flex gap-1.5 bg-primary/10 w-fit p-3 rounded-full mb-6">
-              <Sparkles className="w-5 h-5 text-primary" />
-            </div>
-            <h3 className="font-heading text-3xl italic mb-4 text-primary">Nails By Mamta</h3>
+            <Logo height={150} width={200} />
             <p className="text-foreground/70 max-w-sm leading-relaxed text-lg">
               Elevating nail care to an art form. Book your appointment today and experience true
               craft.
@@ -631,9 +625,9 @@ export default function Home() {
           <div>
             <h4 className="text-[12px] font-bold tracking-[0.15em] uppercase text-foreground mb-6">Contact Us</h4>
             <div className="space-y-4 text-foreground/70">
-              <a 
-                href={settings?.googleMapsLink || '#'} 
-                target="_blank" 
+              <a
+                href={settings?.googleMapsLink || '#'}
+                target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-3 hover:text-primary transition-colors cursor-pointer w-fit"
               >
@@ -642,8 +636,8 @@ export default function Home() {
                 </div>
                 <span>{settings?.contactLocation || 'Boudha, Kathmandu'}</span>
               </a>
-              <a 
-                href={`https://wa.me/${(settings?.contactPhone || '').replace(/[^0-9]/g, '')}`} 
+              <a
+                href={`https://wa.me/${(settings?.contactPhone || '').replace(/[^0-9]/g, '')}`}
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-3 hover:text-primary transition-colors cursor-pointer w-fit"
@@ -695,13 +689,13 @@ export default function Home() {
             </div>
           </div>
           <div className="col-span-1 md:col-span-1 h-48 md:h-full rounded-2xl overflow-hidden border border-primary/20 shadow-md">
-            <iframe 
-              width="100%" 
-              height="100%" 
-              frameBorder="0" 
-              scrolling="no" 
-              marginHeight={0} 
-              marginWidth={0} 
+            <iframe
+              width="100%"
+              height="100%"
+              frameBorder="0"
+              scrolling="no"
+              marginHeight={0}
+              marginWidth={0}
               src={`https://maps.google.com/maps?q=${encodeURIComponent(settings?.contactLocation || 'Boudha, Kathmandu')}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
             ></iframe>
           </div>

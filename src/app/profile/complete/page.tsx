@@ -12,7 +12,7 @@ import { useSession } from 'next-auth/react'
 export default function ProfileCompletionPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
-  const [formData, setFormData] = useState({ phone: '', address: '' })
+  const [formData, setFormData] = useState({ name: '', phone: '', address: '' })
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -30,6 +30,7 @@ export default function ProfileCompletionPage() {
             router.push('/dashboard')
           } else if (data.user) {
             setFormData({
+              name: data.user.name || '',
               phone: data.user.phone || '',
               address: data.user.address || ''
             })
@@ -92,6 +93,22 @@ export default function ProfileCompletionPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white/80 backdrop-blur-xl py-8 px-6 shadow sm:rounded-3xl border border-primary/10 sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <Label htmlFor="name">Full Name</Label>
+              <div className="mt-2">
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  placeholder="Jane Doe"
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  className="bg-white"
+                />
+              </div>
+            </div>
+
             <div>
               <Label htmlFor="phone">Phone Number</Label>
               <div className="mt-2">

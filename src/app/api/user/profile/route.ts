@@ -42,7 +42,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json()
-    const { phone, address } = body
+    const { name, phone, address } = body
 
     if (!phone || !address) {
       return NextResponse.json({ error: 'Phone and address are required' }, { status: 400 })
@@ -50,7 +50,7 @@ export async function PUT(request: Request) {
 
     const updatedUser = await prisma.user.update({
       where: { id: (session?.user as any)?.id },
-      data: { phone, address },
+      data: { name, phone, address },
       select: {
         id: true,
         name: true,

@@ -1,0 +1,12 @@
+# These files will not be uploaded to Vercel during deployments
+# Vercel already respects .gitignore, but this adds extra exclusions
+# to make your builds slightly faster and functions smaller.
+
+.vscode
+.idea
+*.md
+deploy.sh
+push_env.sh
+AGENTS.md
+CLAUDE.md
+components.json

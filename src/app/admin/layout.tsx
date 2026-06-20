@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { CalendarDays, Scissors, Settings, LogOut, LayoutDashboard, KeyRound, Image as ImageIcon } from 'lucide-react'
 import { signOut } from 'next-auth/react'
@@ -26,8 +27,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     <div className="flex h-screen bg-slate-50 dark:bg-zinc-950">
       {/* Sidebar */}
       <aside className="w-64 bg-white dark:bg-zinc-900 border-r shadow-sm hidden md:flex flex-col">
-        <div className="p-6 border-b">
-          <h2 className="text-2xl font-light text-slate-800 dark:text-white">Admin Panel</h2>
+        <div className="p-6 border-b flex items-center justify-center">
+          <Image src="/logo.png" alt="Nail By Mamta Logo" width={140} height={48} className="object-contain" />
         </div>
         <nav className="flex-1 p-4 space-y-2">
           {navLinks.map((link) => {
