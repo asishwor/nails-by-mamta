@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to generate recommendations' }, { status: 500 })
     }
 
-    return NextResponse.json({ recommendedIds: result.object.recommendedServiceIds })
+    return NextResponse.json({ recommendedIds: (result.object as any).recommendedServiceIds })
   } catch (error: any) {
     console.error('AI Search Error:', error)
     return NextResponse.json({ error: 'Failed to process search' }, { status: 500 })
