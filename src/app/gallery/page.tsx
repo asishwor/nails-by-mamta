@@ -8,7 +8,6 @@ import SliderView from '@/components/gallery/SliderView'
 export const dynamic = 'force-dynamic'
 
 interface SearchParams {
-  page?: string
   view?: string
 }
 
@@ -17,25 +16,22 @@ export default async function GalleryPage({
 }: {
   searchParams: Promise<SearchParams>
 }) {
-  const { page, view } = await searchParams
-  const currentPage = parseInt(page || '1', 10)
+  const { view } = await searchParams
   const currentView = (view === 'grid' || view === 'slider') ? view : 'slider'
 
-  // Slider fetches 1 per page, Grid fetches 12 per page
-  const limit = currentView === 'slider' ? 1 : 12
-  const skip = (currentPage - 1) * limit
+  // Slider fetches all (up to 100), Grid fetches 12 per page initially
+  const limit = currentView === 'slider' ? 100 : 12
 
-  // Fetch from Prisma directly (Server Component)
-  const [totalImages, images] = await Promise.all([
-    prisma.galleryImage.count(),
-    prisma.galleryImage.findMany({
-      skip,
-      take: limit,
-      orderBy: { createdAt: 'desc' }
-    })
-  ])
+  const images = await prisma.galleryImage.findMany({
+    take: limit + 1,
+    orderBy: { createdAt: 'desc' }
+  })
 
-  const totalPages = Math.ceil(totalImages / limit)
+  let nextCursor = null;
+  if (currentView === 'grid' && images.length > limit) {
+    const nextItem = images.pop()
+    nextCursor = nextItem?.id
+  }
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden flex flex-col">
@@ -69,20 +65,16 @@ export default async function GalleryPage({
             A curated collection of our finest work. Scroll through to find inspiration for your next visit.
           </p>
           
-          <div className="max-w-xl mx-auto">
-            <GalleryControls 
-              currentView={currentView} 
-              currentPage={currentPage} 
-              totalPages={totalPages} 
-            />
+          <div className="max-w-xl mx-auto flex justify-center">
+            <GalleryControls currentView={currentView} />
           </div>
         </div>
 
         <div className="w-full mt-8">
           {currentView === 'grid' ? (
-            <GridView images={images} />
+            <GridView initialImages={images} initialCursor={nextCursor || null} />
           ) : (
-            <SliderView image={images[0]} />
+            <SliderView images={images} />
           )}
         </div>
       </main>

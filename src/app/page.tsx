@@ -128,15 +128,13 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#FAF5EE] font-sans text-[#16110F]">
-      {/* Premium Navigation Bar */}
-
       <motion.nav
         initial={{ y: -40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className="fixed top-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-5xl z-50 flex items-center justify-between px-6 bg-background/80 backdrop-blur-md border border-primary/20 rounded-full shadow-lg shadow-primary/5"
       >
-        <Logo height={120} width={120} />
+        <Logo height={90} width={90} />
 
         <div className="hidden md:flex items-center gap-8 bg-primary/5 px-6 py-2 rounded-full border border-primary/10">
           <button
