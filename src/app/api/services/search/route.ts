@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       system: "You are a helpful AI assistant that matches user queries to service IDs."
     })
 
-    if (!result) {
+    if (!result || !result.object) {
       return NextResponse.json({ error: 'Failed to generate recommendations' }, { status: 500 })
     }
 
