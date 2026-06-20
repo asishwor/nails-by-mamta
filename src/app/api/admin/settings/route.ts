@@ -16,7 +16,7 @@ export async function PUT(request: Request) {
     const { 
       id, workingDays, startTime, endTime, weeklySchedule, bufferTimeMinutes,
       contactPhone, contactLocation, googleMapsLink, socialLinks,
-      googleClientId, googleIosClientId, googleAndroidClientId
+      googleClientId, googleIosClientId, googleAndroidClientId, apkFileId
     } = body
 
     if (!id) {
@@ -28,7 +28,7 @@ export async function PUT(request: Request) {
       data: { 
         workingDays, startTime, endTime, weeklySchedule, bufferTimeMinutes,
         contactPhone, contactLocation, googleMapsLink, socialLinks,
-        googleClientId, googleIosClientId, googleAndroidClientId
+        googleClientId, googleIosClientId, googleAndroidClientId, apkFileId
       }
     })
 

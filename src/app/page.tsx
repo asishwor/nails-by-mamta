@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { motion, Variants } from 'framer-motion'
-import { Clock, MapPin, Menu, Phone, ShieldCheck, Sparkles, X } from 'lucide-react'
+import { Clock, MapPin, Menu, Phone, ShieldCheck, Sparkles, X, Smartphone, Download } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { JSX, useEffect, useState } from 'react'
@@ -157,6 +157,13 @@ export default function Home() {
             Gallery
             <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-primary transition-all group-hover:w-full"></span>
           </Link>
+          <button
+            onClick={() => document.getElementById('download')?.scrollIntoView({ behavior: 'smooth' })}
+            className="text-[12px] font-semibold text-foreground/80 hover:text-primary transition-colors tracking-[0.15em] uppercase relative group"
+          >
+            App
+            <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-primary transition-all group-hover:w-full"></span>
+          </button>
         </div>
 
         <div className="hidden md:flex items-center gap-3">
@@ -220,6 +227,15 @@ export default function Home() {
           >
             Gallery
           </Link>
+          <button
+            onClick={() => {
+              setIsMobileMenuOpen(false)
+              document.getElementById('download')?.scrollIntoView({ behavior: 'smooth' })
+            }}
+            className="text-[14px] font-semibold text-foreground hover:text-primary transition-colors tracking-[0.15em] uppercase text-left"
+          >
+            App
+          </button>
 
           <div className="h-px w-full bg-primary/10"></div>
 
@@ -603,6 +619,47 @@ export default function Home() {
               <div className="flex items-center gap-4 border-t border-primary/10 pt-6">
                 <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary font-heading text-xl">E</div>
                 <p className="text-[12px] tracking-[0.15em] uppercase text-foreground/70 font-semibold">Emily R.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* App Download Section */}
+      <section id="download" className="py-24 px-6 md:px-12 bg-white relative overflow-hidden border-t border-primary/10">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] -z-10" />
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <p className="flex items-center justify-center gap-2 text-[12px] tracking-[0.2em] uppercase text-primary font-semibold mb-4">
+            <Smartphone className="w-4 h-4" /> Mobilize Beauty
+          </p>
+          <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl text-foreground mb-6">
+            Nails by Mamta <span className="italic font-light">on the Go</span>
+          </h2>
+          <p className="text-lg text-foreground/70 max-w-2xl mx-auto mb-12 leading-relaxed">
+            Book appointments instantly, consult with our AI Styling Assistant, and browse our latest nail designs directly from your smartphone.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            {/* Android Direct Download Button */}
+            <a 
+              href="/api/download/android" 
+              className="flex items-center gap-4 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-full shadow-lg shadow-primary/10 transition-all group cursor-pointer w-full sm:w-auto justify-center"
+            >
+              <Download className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
+              <div className="text-left font-sans">
+                <p className="text-[10px] tracking-wider uppercase opacity-80">Download for</p>
+                <p className="font-semibold text-sm leading-tight">Android (.APK)</p>
+              </div>
+            </a>
+
+            {/* iOS Coming Soon Button */}
+            <div className="flex items-center gap-4 bg-[#FAF5EE] text-foreground/40 border border-primary/20 px-8 py-4 rounded-full w-full sm:w-auto justify-center select-none opacity-80">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.57 2.95-1.39" />
+              </svg>
+              <div className="text-left font-sans">
+                <p className="text-[10px] tracking-wider uppercase">iOS App</p>
+                <p className="font-semibold text-sm leading-tight italic font-heading">Coming Soon</p>
               </div>
             </div>
           </div>

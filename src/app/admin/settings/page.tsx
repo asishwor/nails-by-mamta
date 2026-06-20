@@ -98,13 +98,36 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     setIsSaving(true)
+
+    // Helper to extract Google Drive file ID from link
+    const extractDriveId = (urlOrId: string) => {
+      if (!urlOrId) return '';
+      if (!urlOrId.includes('drive.google.com')) return urlOrId.trim();
+      const match = urlOrId.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) return match[1];
+      const idMatch = urlOrId.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (idMatch && idMatch[1]) return idMatch[1];
+      return urlOrId.trim();
+    }
+
+    const updatedSettings = {
+      ...settings,
+      apkFileId: extractDriveId(settings.apkFileId || '')
+    }
+
     try {
       const res = await fetch('/api/admin/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
+        body: JSON.stringify(updatedSettings)
       })
       if (!res.ok) throw new Error('Failed to save settings')
+      
+      const data = await res.json()
+      if (data.settings) {
+        setSettings(data.settings)
+      }
+      
       toast.success('Settings saved successfully')
     } catch (err) {
       toast.error('Failed to save settings')
@@ -363,6 +386,34 @@ export default function SettingsPage() {
                 </a>
               </p>
             </div>
+          </div>
+        </div>
+
+        <div className="pt-6 border-t space-y-6">
+          <h3 className="text-lg font-medium text-slate-800 dark:text-white">Mobile App Distribution Settings</h3>
+          <p className="text-sm text-slate-500">
+            Paste the Google Drive share link for your Android APK file. The system will automatically extract the file ID to provide direct, proxy-protected downloads.
+          </p>
+          <div className="space-y-2">
+            <Label htmlFor="apkFileId">Android APK Google Drive Link or File ID</Label>
+            <Input
+              id="apkFileId"
+              value={settings.apkFileId || ''}
+              onChange={e => setSettings({ ...settings, apkFileId: e.target.value })}
+              placeholder="e.g. https://drive.google.com/file/d/1_nJj564a2yVdG48H6CXZs7S3Wv8g9Lp2/view?usp=sharing"
+            />
+            {settings.apkFileId && settings.apkFileId.includes('drive.google.com') ? (
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                ✓ Google Drive Link detected. It will be converted to a direct downloadable link.
+              </p>
+            ) : settings.apkFileId ? (
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                ✓ Direct Google Drive File ID active: <code className="bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 rounded">{settings.apkFileId}</code>
+              </p>
+            ) : null}
+            <p className="text-xs text-slate-500">
+              Users will download the app directly from <code>/api/download/android</code> without seeing the Google Drive URL.
+            </p>
           </div>
         </div>
 
