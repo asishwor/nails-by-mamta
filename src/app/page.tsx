@@ -9,7 +9,7 @@ import { motion, Variants } from 'framer-motion'
 import { Clock, MapPin, Menu, Phone, ShieldCheck, Sparkles, X } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { JSX, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 interface Service {
