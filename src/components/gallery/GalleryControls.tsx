@@ -20,24 +20,25 @@ export default function GalleryControls({ currentView }: GalleryControlsProps) {
   }
 
   return (
-            className="rounded-full bg-white/50 border-white/50 hover:bg-white"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <span className="text-sm font-medium text-slate-600">
-            Page {currentPage} of {Math.max(1, totalPages)}
-          </span>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage >= totalPages}
-            className="rounded-full bg-white/50 border-white/50 hover:bg-white"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </Button>
-        </div>
-      )}
+    <div className="flex items-center justify-center gap-2 bg-white/50 backdrop-blur-md border border-white/40 p-1.5 rounded-2xl shadow-sm w-fit">
+      <Button
+        variant={currentView === 'grid' ? 'default' : 'ghost'}
+        size="sm"
+        onClick={() => handleViewChange('grid')}
+        className="flex items-center gap-2 rounded-xl px-4 py-2"
+      >
+        <LayoutGrid className="w-4 h-4" />
+        <span className="hidden sm:inline font-medium">Grid View</span>
+      </Button>
+      <Button
+        variant={currentView === 'slider' ? 'default' : 'ghost'}
+        size="sm"
+        onClick={() => handleViewChange('slider')}
+        className="flex items-center gap-2 rounded-xl px-4 py-2"
+      >
+        <Maximize2 className="w-4 h-4" />
+        <span className="hidden sm:inline font-medium">Slider View</span>
+      </Button>
     </div>
   )
 }
