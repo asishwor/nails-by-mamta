@@ -1,25 +1,60 @@
 {
   "expo": {
-    "name": "nail-by-mamta-app",
-    "slug": "nail-by-mamta-app",
+    "name": "Nails by Mamta",
+    "slug": "nail-by-mamta",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
+    "scheme": "nailsbymamta",
+    "splash": {
+      "image": "./assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.mamatadhakal.nailapp",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow access to select photos."
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#ffffff"
       },
-      "predictiveBackGestureEnabled": false
+      "package": "com.mamatadhakal.nailapp"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/logo.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-secure-store",
+      "expo-web-browser",
+      [
+        "expo-splash-screen",
+        {
+          "android": {
+            "backgroundColor": "#ffffff",
+            "image": "./assets/logo.png",
+            "imageWidth": 200
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "apiBaseUrl": "https://www.mamatadhakal.com.np",
+      "googleClientId": "",
+      "eas": {
+        "projectId": ""
+      }
     }
   }
 }
