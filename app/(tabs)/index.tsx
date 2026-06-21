@@ -1,16 +1,16 @@
-import { useLanguageStore } from '@/store/useLanguageStore';
 import { translations } from '@/lib/i18n';
+import { useLanguageStore } from '@/store/useLanguageStore';
 
 
-import { API_BASE, Colors, Fonts, Radius, Spacing } from '@/constants/theme'
-import { fetchChatHistory, fetchGallery, fetchServices, fetchSettings, Service } from '@/lib/api'
-import { useAuthStore } from '@/store/useAuthStore'
-import { useBookingStore } from '@/store/useBookingStore'
-import { Ionicons } from '@expo/vector-icons'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Image } from 'expo-image'
-import { useFocusEffect, useRouter } from 'expo-router'
-import React, { useEffect, useRef, useState } from 'react'
+import { API_BASE, Colors, Fonts, Radius, Spacing } from '@/constants/theme';
+import { fetchChatHistory, fetchGallery, fetchServices, fetchSettings, Service } from '@/lib/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useBookingStore } from '@/store/useBookingStore';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Image } from 'expo-image';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
@@ -22,8 +22,8 @@ import {
   Text,
   TouchableOpacity,
   View
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window')
 const SLIDER_WIDTH = width - 88
@@ -400,59 +400,57 @@ export default function HomeScreen() {
             <Text style={styles.sectionSubtitle}>Tailored nail designs & care</Text>
           </View>
 
-          <View style={styles.servicesGrid}>
-            {services.map((service, i) => (
-              <Animated.View
-                key={service.id}
-                style={[
-                  styles.serviceCardContainer,
-                  { opacity: fadeAnim, transform: [{ translateY: Animated.multiply(slideAnim, new Animated.Value(1 + i * 0.1)) }] }
-                ]}
+          {services.map((service, i) => (
+            <Animated.View
+              key={service.id}
+              style={[
+                styles.serviceCardContainer,
+                { opacity: fadeAnim, transform: [{ translateY: Animated.multiply(slideAnim, new Animated.Value(1 + i * 0.1)) }] }
+              ]}
+            >
+              <TouchableOpacity
+                style={styles.serviceCard}
+                onPress={() => handleBookService(service)}
+                activeOpacity={0.85}
               >
-                <TouchableOpacity
-                  style={styles.serviceCard}
-                  onPress={() => handleBookService(service)}
-                  activeOpacity={0.85}
-                >
-                  <View style={styles.serviceCardHeader}>
-                    {service.imageUrl ? (
-                      <Image
-                        source={{ uri: service.imageUrl.startsWith('http') ? service.imageUrl : `${API_BASE}${service.imageUrl}` }}
-                        style={styles.serviceImage}
-                        contentFit="cover"
-                      />
-                    ) : (
-                      <View style={styles.serviceImagePlaceholder}>
-                        <Text style={styles.serviceImagePlaceholderText}>💅</Text>
-                      </View>
-                    )}
-                    <View style={styles.servicePriceTag}>
-                      <Text style={styles.servicePriceText}>Rs. {service.price}</Text>
+                <View style={styles.serviceCardHeader}>
+                  {service.imageUrl ? (
+                    <Image
+                      source={{ uri: service.imageUrl.startsWith('http') ? service.imageUrl : `${API_BASE}${service.imageUrl}` }}
+                      style={styles.serviceImage}
+                      contentFit="cover"
+                    />
+                  ) : (
+                    <View style={styles.serviceImagePlaceholder}>
+                      <Text style={styles.serviceImagePlaceholderText}>💅</Text>
                     </View>
+                  )}
+                  <View style={styles.servicePriceTag}>
+                    <Text style={styles.servicePriceText}>Rs. {service.price}</Text>
                   </View>
+                </View>
 
-                  <View style={styles.serviceInfo}>
-                    <Text style={styles.serviceName}>{service.name}</Text>
-                    {service.description && (
-                      <Text style={styles.serviceDesc} numberOfLines={2}>
-                        {service.description}
-                      </Text>
-                    )}
-                    <View style={styles.serviceCardFooter}>
-                      <View style={styles.serviceDurationBadge}>
-                        <Ionicons name="time-outline" size={13} color={Colors.primary} />
-                        <Text style={styles.serviceDurationText}>{service.durationMinutes} Min</Text>
-                      </View>
-                      <View style={styles.bookBtn}>
-                        <Text style={styles.bookBtnText}>{t.bookAppointment}</Text>
-                        <Ionicons name="arrow-forward" size={14} color={Colors.white} />
-                      </View>
+                <View style={styles.serviceInfo}>
+                  <Text style={styles.serviceName}>{service.name}</Text>
+                  {service.description && (
+                    <Text style={styles.serviceDesc} numberOfLines={2}>
+                      {service.description}
+                    </Text>
+                  )}
+                  <View style={styles.serviceCardFooter}>
+                    <View style={styles.serviceDurationBadge}>
+                      <Ionicons name="time-outline" size={13} color={Colors.primary} />
+                      <Text style={styles.serviceDurationText}>{service.durationMinutes} Min</Text>
+                    </View>
+                    <View style={styles.bookBtn}>
+                      <Text style={styles.bookBtnText}>{t.bookAppointment}</Text>
+                      <Ionicons name="arrow-forward" size={14} color={Colors.white} />
                     </View>
                   </View>
-                </TouchableOpacity>
-              </Animated.View>
-            ))}
-          </View>
+                </View>
+              </TouchableOpacity>
+            </Animated.View>
+          ))}
 
         </Animated.View>
 
@@ -703,12 +701,6 @@ const styles = StyleSheet.create({
   },
 
   // Service Card (Menu style matching web)
-  servicesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginTop: 4,
-  },
   serviceCardContainer: { marginBottom: Spacing.md },
   serviceCard: {
     backgroundColor: Colors.surface,
@@ -720,7 +712,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
     shadowRadius: 8,
-    width: (width - Spacing.lg * 2 - 12) / 2,
     elevation: 2,
   },
   serviceCardHeader: { position: 'relative', width: '100%', height: 160 },
