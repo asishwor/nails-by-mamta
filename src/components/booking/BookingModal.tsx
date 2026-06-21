@@ -59,20 +59,54 @@ export function BookingModal({ isOpen, onClose, service }: BookingModalProps) {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', address: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const [lifestyleData, setLifestyleData] = useState({ job: '', smallChildren: '', householdWork: '', typeOnComputer: '', sports: '', heavyHandUsage: '', naturalNailCondition: '', comfortVsFashion: '', workplaceRules: '', maintenanceFrequency: '' })
+
   // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setStep(1)
       setDate(undefined)
       setSelectedTime(null)
+      
+      let aiInfo: any = {}
+      let needsPers = true
+      try {
+        const stored = localStorage.getItem('ai_user_info')
+        if (stored) {
+          aiInfo = JSON.parse(stored)
+          if (aiInfo.job || aiInfo.name) needsPers = false
+        }
+      } catch (e) {}
+
+      setStep(needsPers ? 0 : 1)
+
       setFormData({ 
-        name: session?.user?.name || '', 
+        name: session?.user?.name || aiInfo.name || '', 
         email: session?.user?.email || '', 
-        phone: '', 
-        address: '' 
+        phone: aiInfo.phone || '', 
+        address: aiInfo.address || '' 
       })
     }
   }, [isOpen, session])
+  
+  const handleSaveLifestyle = async () => {
+    const currentStr = localStorage.getItem('ai_user_info') || '{}'
+    const current = JSON.parse(currentStr)
+    const newProfile = { ...current, ...lifestyleData }
+    localStorage.setItem('ai_user_info', JSON.stringify(newProfile))
+    
+    if (session?.user?.id) {
+      try {
+        await fetch('/api/user/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lifestyleProfile: newProfile })
+        })
+      } catch (err) {}
+    }
+    setDirection(1)
+    setStep(1)
+  }
+
 
   // Fetch slots when date changes
   useEffect(() => {
@@ -185,6 +219,7 @@ export function BookingModal({ isOpen, onClose, service }: BookingModalProps) {
             {step === 3 ? 'Booking Confirmed' : `Book ${service.name}`}
           </DialogTitle>
           <DialogDescription>
+            {step === 0 && 'Tell us a bit about your lifestyle for better recommendations.'}
             {step === 1 && 'Select a date and time for your appointment.'}
             {step === 2 && 'Please provide your details to confirm.'}
             {step === 3 && 'We look forward to seeing you!'}
@@ -193,7 +228,107 @@ export function BookingModal({ isOpen, onClose, service }: BookingModalProps) {
 
         <div className="relative h-[400px] mt-4">
           <AnimatePresence initial={false} custom={direction}>
-            {step === 1 && (
+            {step === 0 && (
+              <motion.div
+                key="step0"
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="absolute inset-0 flex flex-col gap-4 overflow-y-auto pr-2 pb-10 px-2"
+              >
+                <div className="p-4 bg-primary/5 rounded-lg border border-primary/10 mb-2">
+                  <h3 className="font-semibold text-lg mb-1">Personalize your experience</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Help us tailor this service and future recommendations to your lifestyle.</p>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>What is your job/profession?</Label>
+                      <Input value={lifestyleData.job} onChange={e => setLifestyleData({...lifestyleData, job: e.target.value})} placeholder="Nurse, desk job, etc..." />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Small children?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.smallChildren} onChange={e => setLifestyleData({...lifestyleData, smallChildren: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Heavy chores?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.householdWork} onChange={e => setLifestyleData({...lifestyleData, householdWork: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Type frequently?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.typeOnComputer} onChange={e => setLifestyleData({...lifestyleData, typeOnComputer: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Play sports?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.sports} onChange={e => setLifestyleData({...lifestyleData, sports: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Heavy-handed?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.heavyHandUsage} onChange={e => setLifestyleData({...lifestyleData, heavyHandUsage: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Nail condition?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.naturalNailCondition} onChange={e => setLifestyleData({...lifestyleData, naturalNailCondition: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Strong">Strong</option>
+                          <option value="Weak/Brittle">Weak/Brittle</option>
+                          <option value="Damaged">Damaged</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Comfort vs Fashion?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.comfortVsFashion} onChange={e => setLifestyleData({...lifestyleData, comfortVsFashion: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Comfort First">Comfort First</option>
+                          <option value="Fashion First">Fashion First</option>
+                          <option value="Balanced">Balanced</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Workplace rules?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.workplaceRules} onChange={e => setLifestyleData({...lifestyleData, workplaceRules: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No Rules">No Rules</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {step === 0 && (
+            <div className="w-full flex justify-between">
+               <Button variant="ghost" onClick={() => { setDirection(1); setStep(1); }}>Skip</Button>
+               <Button onClick={handleSaveLifestyle}>Save & Continue</Button>
+            </div>
+          )}
+          {step === 1 && (
               <motion.div
                 key="step1"
                 custom={direction}
@@ -310,6 +445,106 @@ export function BookingModal({ isOpen, onClose, service }: BookingModalProps) {
         </div>
 
         <div className="flex justify-between mt-6 border-t pt-4 bg-white/90">
+          {step === 0 && (
+              <motion.div
+                key="step0"
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="absolute inset-0 flex flex-col gap-4 overflow-y-auto pr-2 pb-10 px-2"
+              >
+                <div className="p-4 bg-primary/5 rounded-lg border border-primary/10 mb-2">
+                  <h3 className="font-semibold text-lg mb-1">Personalize your experience</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Help us tailor this service and future recommendations to your lifestyle.</p>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>What is your job/profession?</Label>
+                      <Input value={lifestyleData.job} onChange={e => setLifestyleData({...lifestyleData, job: e.target.value})} placeholder="Nurse, desk job, etc..." />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Small children?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.smallChildren} onChange={e => setLifestyleData({...lifestyleData, smallChildren: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Heavy chores?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.householdWork} onChange={e => setLifestyleData({...lifestyleData, householdWork: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Type frequently?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.typeOnComputer} onChange={e => setLifestyleData({...lifestyleData, typeOnComputer: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Play sports?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.sports} onChange={e => setLifestyleData({...lifestyleData, sports: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Heavy-handed?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.heavyHandUsage} onChange={e => setLifestyleData({...lifestyleData, heavyHandUsage: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No">No</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Nail condition?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.naturalNailCondition} onChange={e => setLifestyleData({...lifestyleData, naturalNailCondition: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Strong">Strong</option>
+                          <option value="Weak/Brittle">Weak/Brittle</option>
+                          <option value="Damaged">Damaged</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Comfort vs Fashion?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.comfortVsFashion} onChange={e => setLifestyleData({...lifestyleData, comfortVsFashion: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Comfort First">Comfort First</option>
+                          <option value="Fashion First">Fashion First</option>
+                          <option value="Balanced">Balanced</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Workplace rules?</Label>
+                        <select className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm" value={lifestyleData.workplaceRules} onChange={e => setLifestyleData({...lifestyleData, workplaceRules: e.target.value})}>
+                          <option value="">Select...</option>
+                          <option value="Yes">Yes</option>
+                          <option value="No Rules">No Rules</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {step === 0 && (
+            <div className="w-full flex justify-between">
+               <Button variant="ghost" onClick={() => { setDirection(1); setStep(1); }}>Skip</Button>
+               <Button onClick={handleSaveLifestyle}>Save & Continue</Button>
+            </div>
+          )}
           {step === 1 && (
             <div className="w-full flex justify-end">
                <Button onClick={handleContinueFromStep1} disabled={!date || !selectedTime || isSubmitting}>

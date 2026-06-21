@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarDays, Image as ImageIcon, KeyRound, LayoutDashboard, LogOut, Scissors, Settings } from 'lucide-react'
+import { CalendarDays, Image as ImageIcon, KeyRound, LayoutDashboard, LogOut, MessageSquare, Scissors, Settings, Users } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -17,8 +17,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const navLinks = [
     { href: '/admin/overview', label: 'Overview', icon: LayoutDashboard },
     { href: '/admin', label: 'Bookings', icon: CalendarDays },
+    { href: '/admin/customers', label: 'Customers', icon: Users },
     { href: '/admin/services', label: 'Services', icon: Scissors },
     { href: '/admin/gallery', label: 'Gallery', icon: ImageIcon },
+    { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
     { href: '/admin/settings/ai-keys', label: 'AI Keys', icon: KeyRound },
     { href: '/admin/settings', label: 'Settings', icon: Settings }
   ]

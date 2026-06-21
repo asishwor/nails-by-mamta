@@ -5,9 +5,11 @@ import { Logo } from '@/components/Logo'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { LanguageToggle } from '@/components/ui/LanguageToggle'
 import { motion, Variants } from 'framer-motion'
-import { Clock, MapPin, Menu, Phone, ShieldCheck, Sparkles, X, Smartphone, Download } from 'lucide-react'
+import { Clock, Download, MapPin, Menu, Phone, ShieldCheck, Smartphone, Sparkles, X } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
+import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { JSX, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -16,6 +18,7 @@ interface Service {
   id: string
   name: string
   description: string | null
+  descriptionNp?: string | null
   price: number
   durationMinutes: number
   imageUrl: string | null
@@ -34,6 +37,8 @@ const itemVariants: Variants = {
 }
 
 export default function Home() {
+  const t = useTranslations()
+  const locale = useLocale()
   const { data: session } = useSession()
   const [services, setServices] = useState<Service[]>([])
   const [settings, setSettings] = useState<any>(null)
@@ -45,25 +50,49 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
   const [recommendedIds, setRecommendedIds] = useState<string[] | null>(null)
+  const [personalizedIds, setPersonalizedIds] = useState<string[] | null>(null)
 
+  const [testimonials, setTestimonials] = useState<any[]>([])
   const [galleryImages, setGalleryImages] = useState<any[]>([])
+
+  useEffect(() => {
+    try {
+      const historyStr = localStorage.getItem('ai_chat_history')
+      if (historyStr) {
+        const history = JSON.parse(historyStr)
+        let allIds: string[] = []
+        for (const msg of history) {
+          if (msg.suggestedServiceIds && Array.isArray(msg.suggestedServiceIds)) {
+            allIds.push(...msg.suggestedServiceIds)
+          }
+        }
+        if (allIds.length > 0) {
+          const uniqueIds = Array.from(new Set(allIds.reverse())).slice(0, 3)
+          setPersonalizedIds(uniqueIds)
+        }
+      }
+    } catch (err) { }
+  }, [])
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [servicesRes, settingsRes, galleryRes] = await Promise.all([
+        const [servicesRes, settingsRes, galleryRes, testimonialsRes] = await Promise.all([
           fetch('/api/services'),
           fetch('/api/settings'),
-          fetch('/api/gallery?limit=4')
+          fetch('/api/gallery?limit=4'),
+          fetch('/api/testimonials')
         ])
 
         const servicesData = await servicesRes.json()
         const settingsData = await settingsRes.json()
         const galleryData = await galleryRes.json()
+        const testimonialsData = await testimonialsRes.json()
 
         if (servicesData.services) setServices(servicesData.services)
         if (settingsData.settings) setSettings(settingsData.settings)
         if (galleryData.images) setGalleryImages(galleryData.images)
+        if (testimonialsData.testimonials) setTestimonials(testimonialsData.testimonials)
       } catch (err) {
         console.error('Failed to load data')
       } finally {
@@ -90,13 +119,13 @@ export default function Home() {
       if (data.recommendedIds) {
         setRecommendedIds(data.recommendedIds)
         if (data.recommendedIds.length > 0) {
-          toast.success(`Found ${data.recommendedIds.length} perfect matches for you!`)
+          toast.success(t('Home.searchFound', { count: data.recommendedIds.length }))
         } else {
-          toast.info("We couldn't find a perfect match, but take a look at all our services!")
+          toast.info(t('Home.searchNoMatch'))
         }
       }
     } catch (err) {
-      toast.error('Search failed. Please try again.')
+      toast.error(t('Home.searchFailed'))
     } finally {
       setIsSearching(false)
     }
@@ -122,6 +151,18 @@ export default function Home() {
     setIsModalOpen(true)
   }
 
+  useEffect(() => {
+    const handleOpenBooking = (e: any) => {
+      const { serviceId } = e.detail
+      const svc = services.find(s => s.id === serviceId)
+      if (svc) {
+        handleBookNow(svc)
+      }
+    }
+    window.addEventListener('openBooking', handleOpenBooking)
+    return () => window.removeEventListener('openBooking', handleOpenBooking)
+  }, [services])
+
   const displayedServices = recommendedIds
     ? services.filter(s => recommendedIds.includes(s.id))
     : services;
@@ -144,6 +185,7 @@ export default function Home() {
             Services
             <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-primary transition-all group-hover:w-full"></span>
           </button>
+
           <button
             onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
             className="text-[12px] font-semibold text-foreground/80 hover:text-primary transition-colors tracking-[0.15em] uppercase relative group"
@@ -164,6 +206,8 @@ export default function Home() {
             App
             <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-primary transition-all group-hover:w-full"></span>
           </button>
+          <LanguageToggle />
+
         </div>
 
         <div className="hidden md:flex items-center gap-3">
@@ -283,18 +327,18 @@ export default function Home() {
           >
             <p className="flex items-center gap-2 text-[12px] tracking-[0.2em] uppercase text-primary font-semibold mb-4">
               <Sparkles className="w-4 h-4" />
-              Express Your Style
+              {t('Home.expressStyle')}
             </p>
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-sans font-bold leading-[1.1] mb-6 text-foreground">
-              Nail Art,
+              {t('Home.nailArt')}
               <br />
               <span className="font-heading italic text-primary font-normal flex items-center gap-3 mt-2">
-                Designed for You
+                {t('Home.designedForYou')}
                 <span className="text-4xl text-primary/80">♡</span>
               </span>
             </h1>
             <p className="text-lg text-foreground/70 max-w-md mb-10 leading-relaxed">
-              Trendy nail designs, unique nail arts and expert services – all available online, just for you.
+              {t('Home.heroDescription')}
             </p>
 
             {/* Features Row */}
@@ -303,25 +347,25 @@ export default function Home() {
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2 text-primary">
                   <span className="text-xl">💅</span>
                 </div>
-                <span className="text-[11px] font-medium leading-tight text-foreground">Trendy<br />Designs</span>
+                <span className="text-[11px] font-medium leading-tight text-foreground">{t('Home.featureTrendy').split(' ')[0]}<br />{t('Home.featureTrendy').split(' ').slice(1).join(' ')}</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2 text-primary">
                   <span className="text-xl">🎨</span>
                 </div>
-                <span className="text-[11px] font-medium leading-tight text-foreground">Custom<br />Nail Art</span>
+                <span className="text-[11px] font-medium leading-tight text-foreground">{t('Home.featureCustom').split(' ')[0]}<br />{t('Home.featureCustom').split(' ').slice(1).join(' ')}</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2 text-primary">
                   <span className="text-xl">💻</span>
                 </div>
-                <span className="text-[11px] font-medium leading-tight text-foreground">Online<br />Consultation</span>
+                <span className="text-[11px] font-medium leading-tight text-foreground">{t('Home.featureOnline').split(' ')[0]}<br />{t('Home.featureOnline').split(' ').slice(1).join(' ')}</span>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2 text-primary">
                   <span className="text-xl">🚚</span>
                 </div>
-                <span className="text-[11px] font-medium leading-tight text-foreground">Inspiration<br />Delivered</span>
+                <span className="text-[11px] font-medium leading-tight text-foreground">{t('Home.featureInspiration').split(' ')[0]}<br />{t('Home.featureInspiration').split(' ').slice(1).join(' ')}</span>
               </div>
             </div>
 
@@ -331,10 +375,10 @@ export default function Home() {
                 className="rounded-full px-8 h-12 text-[12px] tracking-[0.1em] uppercase bg-primary hover:bg-primary/90 text-primary-foreground transition-colors shadow-md border-none"
                 onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                Explore Designs &rarr;
+                {t('Home.exploreDesigns')}
               </Button>
               <div className="font-heading italic text-primary/80 text-xl flex items-center gap-2">
-                Beautiful Nails, <br /> Endless Possibilities <Sparkles className="w-5 h-5 opacity-70" />
+                {t('Home.beautifulNails')} <br /> {t('Home.endlessPossibilities')} <Sparkles className="w-5 h-5 opacity-70" />
               </div>
             </div>
 
@@ -379,7 +423,7 @@ export default function Home() {
                   <path id="curve" fill="transparent" d="M 50,50 m -35,0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" />
                   <text className="text-[9px] tracking-[0.25em] fill-[currentColor] font-bold uppercase">
                     <textPath href="#curve" startOffset="0%">
-                      YOUR STYLE • OUR PASSION • YOUR STYLE • OUR PASSION •
+                      {t('Home.circularText')}
                     </textPath>
                   </text>
                 </svg>
@@ -395,12 +439,69 @@ export default function Home() {
         {/* Soft abstract background shapes for services */}
         <div className="absolute top-40 -left-40 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] -z-10 opacity-70" />
         <div className="max-w-6xl mx-auto relative z-10">
+
+          {personalizedIds && personalizedIds.length > 0 && services.length > 0 && (
+            <div className="mb-24">
+              <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12 border-b border-primary/10 pb-8">
+                <div>
+                  <p className="flex items-center gap-2 text-[12px] tracking-[0.2em] uppercase text-primary font-semibold mb-4">
+                    <Sparkles className="w-4 h-4" /> {t('Home.personalStylist')}
+                  </p>
+                  <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl text-foreground">{t('Home.personalizedForYou')}</h2>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {services.filter(s => personalizedIds.includes(s.id)).map((service, i) => (
+                  <motion.div
+                    key={`personalized-${service.id}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-50px' }}
+                    transition={{ duration: 0.5, delay: i * 0.1 }}
+                  >
+                    <Card className="group overflow-hidden rounded-[32px] border-none bg-white shadow-xl shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-2 flex flex-col h-full relative">
+                      <div className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-sm font-semibold text-primary shadow-sm">
+                        Rs. {service.price}
+                      </div>
+                      <div className="relative h-64 overflow-hidden bg-primary/5">
+                        {service.imageUrl ? (
+                          <img src={service.imageUrl} alt={service.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-6xl opacity-20">💅</div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      </div>
+                      <CardHeader className="pt-8 pb-4 relative z-10">
+                        <CardTitle className="font-heading text-2xl mb-2">{service.name}</CardTitle>
+                        <CardDescription className="text-sm font-medium flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-primary" />
+                          {service.durationMinutes} mins
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="flex-grow text-muted-foreground leading-relaxed text-sm">
+                        {service.description}
+                      </CardContent>
+                      <CardFooter className="pt-4 pb-8">
+                        <Button
+                          onClick={() => handleBookClick(service)}
+                          className="w-full bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-2xl py-6 font-semibold text-base transition-all duration-300"
+                        >
+                          Book Now
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16 border-b border-primary/10 pb-8">
             <div>
               <p className="flex items-center gap-2 text-[12px] tracking-[0.2em] uppercase text-primary font-semibold mb-4">
-                <Sparkles className="w-4 h-4" /> The Menu
+                <Sparkles className="w-4 h-4" /> {t('Home.theMenu')}
               </p>
-              <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl text-foreground">Signature Services</h2>
+              <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl text-foreground">{t('Home.signatureServices')}</h2>
             </div>
 
             {/* AI Semantic Search */}
@@ -408,7 +509,7 @@ export default function Home() {
               <form onSubmit={handleSearch} className="flex gap-2">
                 <Input
                   type="text"
-                  placeholder="E.g. I want shiny, long nails for a party..."
+                  placeholder={t('Home.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="border-none bg-transparent shadow-none focus-visible:ring-0 text-sm"
@@ -419,7 +520,7 @@ export default function Home() {
                   </Button>
                 )}
                 <Button type="submit" disabled={isSearching || !searchQuery.trim()} className="bg-primary text-primary-foreground rounded-xl shadow-md">
-                  {isSearching ? '...' : 'Ask AI'}
+                  {isSearching ? t('Home.searching') : t('Home.askAI')}
                 </Button>
               </form>
             </div>
@@ -463,7 +564,7 @@ export default function Home() {
                         </div>
                         {recommendedIds?.includes(service.id) && (
                           <div className="absolute top-4 left-4 bg-rose-500/90 text-white backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold shadow-sm z-10 flex items-center gap-1">
-                            <Sparkles className="w-3 h-3" /> AI Pick
+                            <Sparkles className="w-3 h-3" /> {t('Home.aiPick')}
                           </div>
                         )}
                       </div>
@@ -471,7 +572,7 @@ export default function Home() {
                     <CardHeader className="pt-6 pb-2 px-8">
                       <CardTitle className="font-heading text-2xl text-foreground mb-2">{service.name}</CardTitle>
                       <CardDescription className="line-clamp-2 text-foreground/70 text-base">
-                        {service.description || 'Premium nail service tailored for you.'}
+                        {locale === 'ne' && service.descriptionNp ? service.descriptionNp : (service.description || 'Premium nail service tailored for you.')}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="flex-1 px-8">
@@ -496,7 +597,7 @@ export default function Home() {
             <div className="text-center p-20 rounded-[40px] border-2 border-dashed border-primary/20 bg-primary/5">
               <Sparkles className="w-8 h-8 text-primary/40 mx-auto mb-4" />
               <p className="text-foreground/70 text-lg">
-                {recommendedIds ? "We couldn't find any specific services matching that description. Try asking something else!" : "No services available at the moment."}
+                {recommendedIds ? "We couldn't find any specific services matching that description. Try asking something else!" : "{t('Home.noServices')}"}
               </p>
             </div>
           )}
@@ -511,15 +612,15 @@ export default function Home() {
             <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6">
               <div className="max-w-2xl">
                 <p className="flex items-center gap-2 text-[12px] tracking-[0.2em] uppercase text-primary font-semibold mb-4">
-                  <Sparkles className="w-4 h-4" /> Portfolio
+                  <Sparkles className="w-4 h-4" /> {t('Home.portfolio')}
                 </p>
                 <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl text-foreground">
-                  Recent <span className="italic font-light">Masterpieces</span>
+                  Recent <span className="italic font-light">{t('Home.recentMasterpieces').split(' ').slice(1).join(' ')}</span>
                 </h2>
               </div>
               <Link href="/gallery">
                 <Button className="rounded-full h-12 px-8 text-[12px] tracking-[0.1em] uppercase bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md">
-                  View Full Gallery
+                  {t('Home.viewFullGallery')}
                 </Button>
               </Link>
             </div>
@@ -543,16 +644,16 @@ export default function Home() {
         </section>
       )}
 
-      {/* Why Choose Us */}
+      {/* {t('Home.whyChooseUs')} */}
       <section id="about" className="relative bg-primary text-primary-foreground py-32 px-6 md:px-12 overflow-hidden">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/5 rounded-full blur-[80px] -z-0 translate-x-1/3 -translate-y-1/3" />
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="mb-20 max-w-2xl">
             <p className="flex items-center gap-2 text-[12px] tracking-[0.2em] uppercase text-primary-foreground/80 font-semibold mb-4">
-              <Sparkles className="w-4 h-4" /> Why Choose Us
+              <Sparkles className="w-4 h-4" /> {t('Home.whyChooseUs')}
             </p>
             <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl leading-[1.1]">
-              Three things we <span className="italic font-light">never</span> compromise on.
+              {t('Home.neverCompromise')}
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16">
@@ -560,30 +661,27 @@ export default function Home() {
               <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-8">
                 <Sparkles className="w-6 h-6 text-white" strokeWidth={1.5} />
               </div>
-              <h3 className="font-heading text-2xl mb-4">Premium Products</h3>
+              <h3 className="font-heading text-2xl mb-4">{t('Home.premiumProducts')}</h3>
               <p className="text-primary-foreground/80 leading-relaxed text-lg">
-                Only non-toxic polishes and gels that protect your natural nails while delivering
-                brilliant, lasting color.
+                {t('Home.premiumDesc')}
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-md p-10 rounded-[30px] border border-white/20 hover:bg-white/15 transition-colors">
               <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-8">
                 <ShieldCheck className="w-6 h-6 text-white" strokeWidth={1.5} />
               </div>
-              <h3 className="font-heading text-2xl mb-4">Strict Hygiene</h3>
+              <h3 className="font-heading text-2xl mb-4">{t('Home.strictHygiene')}</h3>
               <p className="text-primary-foreground/80 leading-relaxed text-lg">
-                Tools are medically sterilized and single-use items are discarded after every
-                single appointment.
+                {t('Home.hygieneDesc')}
               </p>
             </div>
             <div className="bg-white/10 backdrop-blur-md p-10 rounded-[30px] border border-white/20 hover:bg-white/15 transition-colors">
               <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mb-8">
                 <span className="text-2xl">♡</span>
               </div>
-              <h3 className="font-heading text-2xl mb-4">Master Artistry</h3>
+              <h3 className="font-heading text-2xl mb-4">{t('Home.masterArtistry')}</h3>
               <p className="text-primary-foreground/80 leading-relaxed text-lg">
-                From classic French tips to intricate 3D designs, years of experience behind every
-                fingertip.
+                {t('Home.artistryDesc')}
               </p>
             </div>
           </div>
@@ -595,32 +693,45 @@ export default function Home() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px] -z-10" />
         <div className="max-w-5xl mx-auto">
           <p className="flex items-center justify-center gap-2 text-[12px] tracking-[0.2em] uppercase text-primary font-semibold mb-4 text-center">
-            <Sparkles className="w-4 h-4" /> From the Chair
+            <Sparkles className="w-4 h-4" /> {t('Home.fromTheChair')}
           </p>
-          <h2 className="font-heading text-4xl md:text-5xl text-center mb-20 text-foreground">What Our Clients Say</h2>
+          <h2 className="font-heading text-4xl md:text-5xl text-center mb-20 text-foreground">{t('Home.whatClientsSay')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div className="bg-white p-10 rounded-[30px] shadow-lg shadow-primary/5 border border-primary/10 relative">
-              <div className="absolute -top-6 -left-6 text-7xl text-primary/20 font-serif">"</div>
-              <p className="font-heading italic text-2xl leading-snug mb-8 text-foreground relative z-10">
-                Absolutely stunning work. So much attention to detail — my acrylics have never
-                looked so natural and lasted so long.
-              </p>
-              <div className="flex items-center gap-4 border-t border-primary/10 pt-6">
-                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary font-heading text-xl">S</div>
-                <p className="text-[12px] tracking-[0.15em] uppercase text-foreground/70 font-semibold">Sarah Jenkins</p>
+            {testimonials.length > 0 ? testimonials.map((tItem, index) => (
+              <div key={tItem.id} className={`bg-white p-10 rounded-[30px] shadow-lg shadow-primary/5 border border-primary/10 relative ${index > 0 ? 'mt-0 md:mt-12' : ''}`}>
+                <div className="absolute -top-6 -left-6 text-7xl text-primary/20 font-serif">"</div>
+                <p className="font-heading italic text-2xl leading-snug mb-8 text-foreground relative z-10">
+                  {locale === 'ne' && tItem.contentNp ? tItem.contentNp : tItem.contentEn}
+                </p>
+                <div className="flex items-center gap-4 border-t border-primary/10 pt-6">
+                  <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary font-heading text-xl">{tItem.authorInitial}</div>
+                  <p className="text-[12px] tracking-[0.15em] uppercase text-foreground/70 font-semibold">{tItem.authorName}</p>
+                </div>
               </div>
-            </div>
-            <div className="bg-white p-10 rounded-[30px] shadow-lg shadow-primary/5 border border-primary/10 relative mt-0 md:mt-12">
-              <div className="absolute -top-6 -left-6 text-7xl text-primary/20 font-serif">"</div>
-              <p className="font-heading italic text-2xl leading-snug mb-8 text-foreground relative z-10">
-                The studio is calm and spotless. The gel pedicure and foot massage were exactly
-                what I needed after a long week.
-              </p>
-              <div className="flex items-center gap-4 border-t border-primary/10 pt-6">
-                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary font-heading text-xl">E</div>
-                <p className="text-[12px] tracking-[0.15em] uppercase text-foreground/70 font-semibold">Emily R.</p>
-              </div>
-            </div>
+            )) : (
+              <>
+                <div className="bg-white p-10 rounded-[30px] shadow-lg shadow-primary/5 border border-primary/10 relative">
+                  <div className="absolute -top-6 -left-6 text-7xl text-primary/20 font-serif">"</div>
+                  <p className="font-heading italic text-2xl leading-snug mb-8 text-foreground relative z-10">
+                    {t('Home.test1')}
+                  </p>
+                  <div className="flex items-center gap-4 border-t border-primary/10 pt-6">
+                    <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary font-heading text-xl">S</div>
+                    <p className="text-[12px] tracking-[0.15em] uppercase text-foreground/70 font-semibold">Sarah Jenkins</p>
+                  </div>
+                </div>
+                <div className="bg-white p-10 rounded-[30px] shadow-lg shadow-primary/5 border border-primary/10 relative mt-0 md:mt-12">
+                  <div className="absolute -top-6 -left-6 text-7xl text-primary/20 font-serif">"</div>
+                  <p className="font-heading italic text-2xl leading-snug mb-8 text-foreground relative z-10">
+                    {t('Home.test2')}
+                  </p>
+                  <div className="flex items-center gap-4 border-t border-primary/10 pt-6">
+                    <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary font-heading text-xl">E</div>
+                    <p className="text-[12px] tracking-[0.15em] uppercase text-foreground/70 font-semibold">Emily R.</p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -630,36 +741,36 @@ export default function Home() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] -z-10" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <p className="flex items-center justify-center gap-2 text-[12px] tracking-[0.2em] uppercase text-primary font-semibold mb-4">
-            <Smartphone className="w-4 h-4" /> Mobilize Beauty
+            <Smartphone className="w-4 h-4" /> {t('Home.mobilizeBeauty')}
           </p>
           <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl text-foreground mb-6">
             Nails by Mamta <span className="italic font-light">on the Go</span>
           </h2>
           <p className="text-lg text-foreground/70 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Book appointments instantly, consult with our AI Styling Assistant, and browse our latest nail designs directly from your smartphone.
+            {t('Home.mobileBody')}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             {/* Android Direct Download Button */}
-            <a 
-              href="/api/download/android" 
+            <a
+              href="/api/download/android"
               className="flex items-center gap-4 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-full shadow-lg shadow-primary/10 transition-all group cursor-pointer w-full sm:w-auto justify-center"
             >
               <Download className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
               <div className="text-left font-sans">
-                <p className="text-[10px] tracking-wider uppercase opacity-80">Download for</p>
-                <p className="font-semibold text-sm leading-tight">Android (.APK)</p>
+                <p className="text-[10px] tracking-wider uppercase opacity-80">{t('Home.downloadFor')}</p>
+                <p className="font-semibold text-sm leading-tight">{t('Home.androidApk')}</p>
               </div>
             </a>
 
-            {/* iOS Coming Soon Button */}
+            {/* iOS {t('Home.comingSoon')} Button */}
             <div className="flex items-center gap-4 bg-[#FAF5EE] text-foreground/40 border border-primary/20 px-8 py-4 rounded-full w-full sm:w-auto justify-center select-none opacity-80">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.57 2.95-1.39" />
               </svg>
               <div className="text-left font-sans">
-                <p className="text-[10px] tracking-wider uppercase">iOS App</p>
-                <p className="font-semibold text-sm leading-tight italic font-heading">Coming Soon</p>
+                <p className="text-[10px] tracking-wider uppercase">{t('Home.iosApp')}</p>
+                <p className="font-semibold text-sm leading-tight italic font-heading">{t('Home.comingSoon')}</p>
               </div>
             </div>
           </div>
@@ -672,12 +783,11 @@ export default function Home() {
           <div className="col-span-1 md:col-span-1">
             <Logo height={150} width={200} />
             <p className="text-foreground/70 max-w-sm leading-relaxed text-lg">
-              Elevating nail care to an art form. Book your appointment today and experience true
-              craft.
+              {t('Home.footerDesc')}
             </p>
           </div>
           <div>
-            <h4 className="text-[12px] font-bold tracking-[0.15em] uppercase text-foreground mb-6">Contact Us</h4>
+            <h4 className="text-[12px] font-bold tracking-[0.15em] uppercase text-foreground mb-6">{t('Home.contactUs')}</h4>
             <div className="space-y-4 text-foreground/70">
               <a
                 href={settings?.googleMapsLink || '#'}

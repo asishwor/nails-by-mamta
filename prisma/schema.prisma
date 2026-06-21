@@ -34,12 +34,14 @@ model User {
   passwordHash  String?
   phone         String?
   address       String?
+  lifestyleProfile Json?
   role          Role      @default(USER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   bookings      Booking[]
   accounts      Account[]
   sessions      Session[]
+  chatSessions  ChatSession[]
 }
 
 model Account {
@@ -81,6 +83,7 @@ model Service {
   id              String    @id @default(uuid())
   name            String
   description     String?
+  descriptionNp   String?
   price           Float
   durationMinutes Int
   imageUrl        String?
@@ -115,6 +118,7 @@ model Booking {
   startTime DateTime
   endTime   DateTime
   status    BookingStatus @default(PENDING)
+  cancelReason String?
   createdAt DateTime      @default(now())
 
   user    User    @relation(fields: [userId], references: [id])
@@ -127,9 +131,32 @@ model ApiKey {
   id           String    @id @default(uuid())
   provider     String    // "GEMINI" or "GROQ"
   key          String    @unique
+  models       Json?     // e.g. { "search": "llama3-8b", "chat": "llama3-70b" }
   blockedUntil DateTime?
   isActive     Boolean   @default(true)
   createdAt    DateTime  @default(now())
+}
+
+model ChatSession {
+  id             String    @id @default(uuid())
+  userId         String?   // Nullable for guest users (stored locally via ID)
+  language       String?   @default("en")
+  bookingContext Json?     // Extracted preferences from chat
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  messages       ChatMessage[]
+  
+  user           User?     @relation(fields: [userId], references: [id])
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  sessionId  String
+  role       String   // "user" or "assistant"
+  content    String   @db.Text
+  createdAt  DateTime @default(now())
+
+  session    ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
 model GalleryImage {
@@ -137,4 +164,14 @@ model GalleryImage {
   url       String
   altText   String?
   createdAt DateTime @default(now())
+}
+
+model Testimonial {
+  id            String   @id @default(uuid())
+  contentEn     String   @db.Text
+  contentNp     String?  @db.Text
+  authorName    String
+  authorInitial String   // E.g. 'S' for Sarah
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
 }

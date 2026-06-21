@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { ApiKeyManager } from '@/components/admin/ApiKeyManager'
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<any>(null)
@@ -467,6 +468,15 @@ export default function SettingsPage() {
             </Button>
           </div>
         </form>
+      </div>
+
+      {/* AI Configuration Section */}
+      <div className="bg-white dark:bg-zinc-900 border rounded-xl p-6 shadow-sm space-y-8">
+        <div>
+          <h3 className="text-lg font-medium mb-1">AI Configuration</h3>
+          <p className="text-sm text-slate-500 mb-6">Manage API keys and AI models for your smart chatbot and search features.</p>
+          <ApiKeyManager />
+        </div>
       </div>
     </div>
   )
