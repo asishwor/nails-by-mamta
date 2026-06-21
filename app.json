@@ -7,11 +7,7 @@
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "scheme": "nailsbymamta",
-    "splash": {
-      "image": "./assets/logo.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
+
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.mamatadhakal.nailapp",
@@ -53,8 +49,10 @@
       "apiBaseUrl": "https://www.mamatadhakal.com.np",
       "googleClientId": "",
       "eas": {
-        "projectId": ""
-      }
-    }
+        "projectId": "e8cc1659-d074-4e14-96a3-2b9e2d534251"
+      },
+      "router": {}
+    },
+    "owner": "eso401"
   }
 }

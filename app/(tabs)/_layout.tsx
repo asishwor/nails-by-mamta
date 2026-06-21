@@ -1,3 +1,5 @@
+import { useLanguageStore } from '@/store/useLanguageStore';
+import { translations } from '@/lib/i18n';
 import { Tabs, Redirect } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { Colors } from '@/constants/theme'
@@ -5,6 +7,8 @@ import { View, ActivityIndicator } from 'react-native'
 import { useAuthStore } from '@/store/useAuthStore'
 
 export default function TabLayout() {
+  const { lang, setLang } = useLanguageStore()
+  const t = translations[lang]
   const { user, isLoading } = useAuthStore()
 
   if (isLoading) {
@@ -43,14 +47,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: t.home,
           tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="gallery"
         options={{
-          title: 'Gallery',
+          title: t.gallery,
           tabBarIcon: ({ color, size }) => <Ionicons name="images-outline" size={size} color={color} />,
         }}
       />
@@ -64,7 +68,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="bookings"
         options={{
-          title: 'Bookings',
+          title: t.bookings,
           tabBarIcon: ({ color, size }) => <Ionicons name="calendar-outline" size={size} color={color} />,
         }}
       />

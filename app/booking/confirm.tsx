@@ -39,7 +39,6 @@ export default function ConfirmScreen() {
       await createBooking({ serviceId: selectedService.id, date: selectedDate, time: selectedTime })
       setIsSuccess(true)
       playSuccess()
-      reset()
     } catch (e: any) {
       Alert.alert('Booking Failed', e?.response?.data?.error || 'Please try again')
     } finally {
@@ -69,10 +68,10 @@ export default function ConfirmScreen() {
           <Text style={styles.successSubtitle}>
             Your appointment for {selectedService?.name} has been submitted.{'\n'}We'll confirm shortly.
           </Text>
-          <TouchableOpacity style={styles.doneBtn} onPress={() => { router.replace('/(tabs)/bookings') }}>
+          <TouchableOpacity style={styles.doneBtn} onPress={() => { reset(); router.replace('/(tabs)/bookings') }}>
             <Text style={styles.doneBtnText}>View My Bookings</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.replace('/(tabs)')}>
+          <TouchableOpacity onPress={() => { reset(); router.replace('/(tabs)') }}>
             <Text style={styles.homeLink}>Back to Home</Text>
           </TouchableOpacity>
         </Animated.View>

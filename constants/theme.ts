@@ -50,4 +50,4 @@ export const Radius = {
   full: 9999,
 }
 
-export const API_BASE = 'https://www.mamatadhakal.com.np'
+export const API_BASE = 'http://192.168.1.64:3000'

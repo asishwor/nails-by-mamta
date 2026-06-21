@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Modal, StatusBar, ActivityIndicator } from 'react-native'
-import { FlashList } from '@shopify/flash-list'
+import { ScrollView } from 'react-native'
 import { Image } from 'expo-image'
 import { Colors, Fonts, Spacing, Radius } from '@/constants/theme'
 import { fetchGallery } from '@/lib/api'
@@ -51,17 +51,23 @@ export default function GalleryScreen() {
     load(cursor)
   }
 
-  const renderItem = ({ item }: { item: GalleryImage }) => (
-    <TouchableOpacity onPress={() => setSelectedImage(item)} activeOpacity={0.9}>
-      <Image
-        source={{ uri: item.url }}
-        style={styles.thumbnail}
-        contentFit="cover"
-        transition={300}
-        placeholder={{ blurhash: 'L6Pj0^jE.AyE_3t7t7R**0o#DgR4' }}
-      />
-    </TouchableOpacity>
-  )
+  const renderItem = ({ item, index }: { item: GalleryImage, index: number }) => {
+    // Generate pseudo-random heights for masonry effect
+    const heights = [ITEM_SIZE * 1.5, ITEM_SIZE * 1.2, ITEM_SIZE * 1.8, ITEM_SIZE * 1.1]
+    const randomHeight = heights[index % heights.length]
+    
+    return (
+      <TouchableOpacity onPress={() => setSelectedImage(item)} activeOpacity={0.9} style={{ padding: Spacing.xs }}>
+        <Image
+          source={{ uri: item.url }}
+          style={[styles.thumbnail, { height: randomHeight }]}
+          contentFit="cover"
+          transition={300}
+          placeholder={{ blurhash: 'L6Pj0^jE.AyE_3t7t7R**0o#DgR4' }}
+        />
+      </TouchableOpacity>
+    )
+  }
 
   if (isLoading) {
     return (
@@ -78,21 +84,30 @@ export default function GalleryScreen() {
         <Text style={styles.headerSubtitle}>Our latest work</Text>
       </View>
 
-      <FlashList
-        data={images}
-        renderItem={renderItem}
-        numColumns={2}
+            <ScrollView 
         contentContainerStyle={styles.grid}
-        ItemSeparatorComponent={() => <View style={{ height: Spacing.sm }} />}
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.3}
-        ListFooterComponent={isFetchingMore ? <ActivityIndicator color={Colors.primary} style={{ padding: 16 }} /> : null}
-        ListEmptyComponent={
+        onScroll={({nativeEvent}) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 300;
+          if (isCloseToBottom) loadMore();
+        }}
+        scrollEventThrottle={400}
+      >
+        {images.length === 0 && !isLoading && (
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>No images yet</Text>
           </View>
-        }
-      />
+        )}
+        <View style={{ flexDirection: 'row', gap: Spacing.md }}>
+          <View style={{ flex: 1, gap: Spacing.md }}>
+            {images.filter((_, i) => i % 2 === 0).map((item, index) => renderItem({ item, index }))}
+          </View>
+          <View style={{ flex: 1, gap: Spacing.md, paddingTop: 40 }}>
+            {images.filter((_, i) => i % 2 === 1).map((item, index) => renderItem({ item, index }))}
+          </View>
+        </View>
+        {isFetchingMore && <ActivityIndicator color={Colors.primary} style={{ padding: 16 }} />}
+      </ScrollView>
 
       {/* Full-screen viewer */}
       <Modal visible={!!selectedImage} transparent animationType="fade" onRequestClose={() => setSelectedImage(null)}>

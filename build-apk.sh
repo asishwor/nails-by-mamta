@@ -40,17 +40,25 @@ fi
 echo "📦 Step 3: Generating native Android files (npx expo prebuild)..."
 npx expo prebuild --platform android --clean
 
+# 3.5 Optimize Build Settings
+echo "⚙️  Step 3.5: Optimizing build settings for size (ARM only, Minification)..."
+# Restrict to ARM architectures to save massive space (drops x86/x86_64)
+sed -i '' 's/reactNativeArchitectures=armeabi-v7a,arm64-v8a,x86,x86_64/reactNativeArchitectures=armeabi-v7a,arm64-v8a/g' android/gradle.properties
+# Enable ProGuard/Minification
+echo "android.enableMinifyInReleaseBuilds=true" >> android/gradle.properties
+echo "android.enableShrinkResourcesInReleaseBuilds=true" >> android/gradle.properties
+
 # 4. Compile APK with Gradle
-echo "🏗️ Step 4: Compiling APK using Gradle (assembleDebug)..."
+echo "🏗️ Step 4: Compiling APK using Gradle (assembleRelease)..."
 cd android
 chmod +x gradlew
-./gradlew assembleDebug
+./gradlew assembleRelease
 cd ..
 
 # 5. Export APK to builds folder
 echo "🚚 Step 5: Exporting compiled APK..."
 mkdir -p builds
-APK_SOURCE="android/app/build/outputs/apk/debug/app-debug.apk"
+APK_SOURCE="android/app/build/outputs/apk/release/app-release.apk"
 
 if [ -f "$APK_SOURCE" ]; then
   cp "$APK_SOURCE" "builds/nails-by-mamta.apk"

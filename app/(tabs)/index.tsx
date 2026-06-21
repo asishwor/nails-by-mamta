@@ -1,11 +1,16 @@
+import { useLanguageStore } from '@/store/useLanguageStore';
+import { translations } from '@/lib/i18n';
+
+
 import { API_BASE, Colors, Fonts, Radius, Spacing } from '@/constants/theme'
-import { fetchGallery, fetchServices, fetchSettings, Service } from '@/lib/api'
+import { fetchChatHistory, fetchGallery, fetchServices, fetchSettings, Service } from '@/lib/api'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useBookingStore } from '@/store/useBookingStore'
 import { Ionicons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
-import { useEffect, useRef, useState } from 'react'
+import { useFocusEffect, useRouter } from 'expo-router'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   Animated,
@@ -21,7 +26,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 const { width } = Dimensions.get('window')
-const SLIDER_WIDTH = width - 48
+const SLIDER_WIDTH = width - 88
 
 interface GalleryImage {
   id: string
@@ -30,12 +35,15 @@ interface GalleryImage {
 }
 
 export default function HomeScreen() {
+  const { lang } = useLanguageStore()
+  const t = translations[lang]
   const router = useRouter()
   const { user } = useAuthStore()
   const setService = useBookingStore((s) => s.setService)
 
   const [services, setServices] = useState<Service[]>([])
   const [popularServices, setPopularServices] = useState<Service[]>([])
+  const [personalizedServices, setPersonalizedServices] = useState<Service[]>([])
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([])
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -45,6 +53,18 @@ export default function HomeScreen() {
 
   const fadeAnim = useRef(new Animated.Value(0)).current
   const slideAnim = useRef(new Animated.Value(30)).current
+  const sliderRef = useRef<ScrollView>(null)
+
+  // Auto-play popular services slider
+  useEffect(() => {
+    if (popularServices.length <= 1) return
+    let currentIndex = activeSlide
+    const interval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % popularServices.length
+      sliderRef.current?.scrollTo({ x: currentIndex * (SLIDER_WIDTH + 12), animated: true })
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [popularServices.length, activeSlide])
 
   const loadData = async () => {
     try {
@@ -75,6 +95,26 @@ export default function HomeScreen() {
       }).slice(0, 5)
 
       setPopularServices(popular)
+
+      // Personalized logic
+      try {
+        const chatKey = `chat_history_${user?.id || 'guest'}`
+        const chatStr = await AsyncStorage.getItem(chatKey)
+        if (chatStr) {
+          const history = JSON.parse(chatStr)
+          let allIds: string[] = []
+          for (const msg of history) {
+            if (msg.suggestedServices && Array.isArray(msg.suggestedServices)) {
+              allIds.push(...msg.suggestedServices.map((s: any) => s.id))
+            }
+          }
+          if (allIds.length > 0) {
+            const uniqueIds = Array.from(new Set(allIds.reverse())).slice(0, 3)
+            setPersonalizedServices(activeServices.filter(s => uniqueIds.includes(s.id)))
+          }
+        }
+      } catch (err) { }
+
     } catch (e) {
       console.error(e)
     } finally {
@@ -91,6 +131,37 @@ export default function HomeScreen() {
       ]).start()
     })
   }, [])
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadPersonalized = async () => {
+        try {
+          if (user) {
+            const apiChat = await fetchChatHistory()
+            if (apiChat && apiChat.messages && apiChat.messages.length > 0) {
+              await AsyncStorage.setItem(`chat_history_${user.id}`, JSON.stringify(apiChat.messages))
+            }
+          }
+          const chatKey = `chat_history_${user?.id || 'guest'}`
+          const chatStr = await AsyncStorage.getItem(chatKey)
+          if (chatStr) {
+            const history = JSON.parse(chatStr)
+            let allIds: string[] = []
+            for (const msg of history) {
+              if (msg.suggestedServices && Array.isArray(msg.suggestedServices)) {
+                allIds.push(...msg.suggestedServices.map((s: any) => s.id))
+              }
+            }
+            if (allIds.length > 0 && services.length > 0) {
+              const uniqueIds = Array.from(new Set(allIds.reverse())).slice(0, 3)
+              setPersonalizedServices(services.filter(s => uniqueIds.includes(s.id)))
+            }
+          }
+        } catch (err) { }
+      }
+      loadPersonalized()
+    }, [user, services])
+  )
 
   const onRefresh = () => {
     setRefreshing(true)
@@ -146,17 +217,74 @@ export default function HomeScreen() {
           )}
         </Animated.View>
 
-        {/* Popular Services Slider (Hero Section) */}
+
+        {personalizedServices.length > 0 && (
+          <Animated.View style={[styles.sliderSection, { opacity: fadeAnim, marginBottom: Spacing.xl }]}>
+            <View style={[styles.sectionHeader, { paddingLeft: Spacing.md }]}>
+              <View>
+                <Text style={styles.sectionEyebrow}>✨ Personal Stylist</Text>
+                <Text style={styles.sectionTitle}>Personalized For You</Text>
+              </View>
+            </View>
+
+            <ScrollView
+              horizontal
+              snapToInterval={SLIDER_WIDTH + 12}
+              decelerationRate="fast"
+              snapToAlignment="start"
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.sliderContent}
+            >
+              {personalizedServices.map((service) => (
+                <TouchableOpacity
+                  key={`personalized-${service.id}`}
+                  style={styles.sliderCard}
+                  onPress={() => handleBookService(service)}
+                  activeOpacity={0.9}
+                >
+                  <View style={styles.sliderCardImageContainer}>
+                    {service.imageUrl ? (
+                      <Image
+                        source={{ uri: service.imageUrl.startsWith('http') ? service.imageUrl : `${API_BASE}${service.imageUrl}` }}
+                        style={styles.sliderCardImage}
+                        contentFit="cover"
+                      />
+                    ) : (
+                      <View style={styles.sliderCardPlaceholder}>
+                        <Text style={styles.sliderCardPlaceholderText}>💅</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <View style={styles.sliderCardInfo}>
+                    <Text style={styles.sliderCardName}>{service.name}</Text>
+                    {service.description && (
+                      <Text style={styles.sliderCardDesc} numberOfLines={1}>
+                        {service.description}
+                      </Text>
+                    )}
+                    <View style={styles.priceTag}>
+                      <Text style={styles.priceText}>Rs. {service.price}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </Animated.View>
+        )}
+
+        {/* {t.popularServices} Slider (Hero Section) */}
         {popularServices.length > 0 && (
           <Animated.View style={[styles.sliderSection, { opacity: fadeAnim }]}>
             <View style={[styles.sectionHeader, { paddingLeft: Spacing.md }]}>
               <View>
                 <Text style={styles.sectionEyebrow}>♡ Best Sellers</Text>
-                <Text style={styles.sectionTitle}>Popular Services</Text>
+                <Text style={styles.sectionTitle}>{t.popularServices}</Text>
               </View>
             </View>
 
             <ScrollView
+              ref={sliderRef}
               horizontal
               snapToInterval={SLIDER_WIDTH + 12}
               decelerationRate="fast"
@@ -272,57 +400,60 @@ export default function HomeScreen() {
             <Text style={styles.sectionSubtitle}>Tailored nail designs & care</Text>
           </View>
 
-          {services.map((service, i) => (
-            <Animated.View
-              key={service.id}
-              style={[
-                styles.serviceCardContainer,
-                { opacity: fadeAnim, transform: [{ translateY: Animated.multiply(slideAnim, new Animated.Value(1 + i * 0.1)) }] }
-              ]}
-            >
-              <TouchableOpacity
-                style={styles.serviceCard}
-                onPress={() => handleBookService(service)}
-                activeOpacity={0.85}
+          <View style={styles.servicesGrid}>
+            {services.map((service, i) => (
+              <Animated.View
+                key={service.id}
+                style={[
+                  styles.serviceCardContainer,
+                  { opacity: fadeAnim, transform: [{ translateY: Animated.multiply(slideAnim, new Animated.Value(1 + i * 0.1)) }] }
+                ]}
               >
-                <View style={styles.serviceCardHeader}>
-                  {service.imageUrl ? (
-                    <Image
-                      source={{ uri: service.imageUrl.startsWith('http') ? service.imageUrl : `${API_BASE}${service.imageUrl}` }}
-                      style={styles.serviceImage}
-                      contentFit="cover"
-                    />
-                  ) : (
-                    <View style={styles.serviceImagePlaceholder}>
-                      <Text style={styles.serviceImagePlaceholderText}>💅</Text>
+                <TouchableOpacity
+                  style={styles.serviceCard}
+                  onPress={() => handleBookService(service)}
+                  activeOpacity={0.85}
+                >
+                  <View style={styles.serviceCardHeader}>
+                    {service.imageUrl ? (
+                      <Image
+                        source={{ uri: service.imageUrl.startsWith('http') ? service.imageUrl : `${API_BASE}${service.imageUrl}` }}
+                        style={styles.serviceImage}
+                        contentFit="cover"
+                      />
+                    ) : (
+                      <View style={styles.serviceImagePlaceholder}>
+                        <Text style={styles.serviceImagePlaceholderText}>💅</Text>
+                      </View>
+                    )}
+                    <View style={styles.servicePriceTag}>
+                      <Text style={styles.servicePriceText}>Rs. {service.price}</Text>
                     </View>
-                  )}
-                  <View style={styles.servicePriceTag}>
-                    <Text style={styles.servicePriceText}>Rs. {service.price}</Text>
                   </View>
-                </View>
 
-                <View style={styles.serviceInfo}>
-                  <Text style={styles.serviceName}>{service.name}</Text>
-                  {service.description && (
-                    <Text style={styles.serviceDesc} numberOfLines={2}>
-                      {service.description}
-                    </Text>
-                  )}
-                  <View style={styles.serviceCardFooter}>
-                    <View style={styles.serviceDurationBadge}>
-                      <Ionicons name="time-outline" size={13} color={Colors.primary} />
-                      <Text style={styles.serviceDurationText}>{service.durationMinutes} Min</Text>
-                    </View>
-                    <View style={styles.bookBtn}>
-                      <Text style={styles.bookBtnText}>Book Appointment</Text>
-                      <Ionicons name="arrow-forward" size={14} color={Colors.white} />
+                  <View style={styles.serviceInfo}>
+                    <Text style={styles.serviceName}>{service.name}</Text>
+                    {service.description && (
+                      <Text style={styles.serviceDesc} numberOfLines={2}>
+                        {service.description}
+                      </Text>
+                    )}
+                    <View style={styles.serviceCardFooter}>
+                      <View style={styles.serviceDurationBadge}>
+                        <Ionicons name="time-outline" size={13} color={Colors.primary} />
+                        <Text style={styles.serviceDurationText}>{service.durationMinutes} Min</Text>
+                      </View>
+                      <View style={styles.bookBtn}>
+                        <Text style={styles.bookBtnText}>{t.bookAppointment}</Text>
+                        <Ionicons name="arrow-forward" size={14} color={Colors.white} />
+                      </View>
                     </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            </Animated.View>
-          ))}
+                </TouchableOpacity>
+              </Animated.View>
+            ))}
+          </View>
+
         </Animated.View>
 
         {/* Studio Hours */}
@@ -474,53 +605,40 @@ const styles = StyleSheet.create({
   sliderContent: { paddingLeft: Spacing.lg, paddingRight: Spacing.lg - 12 },
   sliderCard: {
     width: SLIDER_WIDTH,
+    height: 280,
     backgroundColor: Colors.surface,
     borderRadius: Radius.xl,
     marginRight: 12,
     borderWidth: 1,
     borderColor: Colors.border,
-    padding: 12,
-    shadowColor: Colors.charcoal,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  sliderCardImageContainer: {
-    width: '100%',
-    height: 170,
-    borderRadius: Radius.lg,
     overflow: 'hidden',
-    position: 'relative',
-  },
-  sliderCardImage: { width: '100%', height: '100%' },
-  sliderCardPlaceholder: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: Colors.surfaceAlt,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sliderCardPlaceholderText: { fontSize: 40 },
-  priceTag: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: Radius.full,
     shadowColor: Colors.charcoal,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
     elevation: 2,
+    justifyContent: 'flex-end',
   },
-  priceText: { fontFamily: Fonts.bodySemibold, fontSize: 13, color: Colors.primary },
-
-  sliderCardInfo: { paddingVertical: 12 },
-  sliderCardName: { fontFamily: Fonts.heading, fontSize: 18, color: Colors.charcoal, marginBottom: 4 },
-  sliderCardDesc: { fontFamily: Fonts.body, fontSize: 13, color: Colors.textSecondary, lineHeight: 18, marginBottom: 12 },
+  sliderCardImageContainer: { ...StyleSheet.absoluteFill, backgroundColor: Colors.surfaceAlt },
+  sliderCardImage: { width: '100%', height: '100%' },
+  sliderCardPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  sliderCardPlaceholderText: { fontSize: 48, opacity: 0.5 },
+  priceTag: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    borderRadius: Radius.full,
+    alignSelf: 'flex-start',
+    marginTop: Spacing.xs,
+  },
+  priceText: { fontFamily: Fonts.heading, fontSize: 14, color: Colors.primary },
+  sliderCardInfo: {
+    padding: Spacing.lg,
+    paddingTop: Spacing.xxl,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  sliderCardName: { fontFamily: Fonts.heading, fontSize: 22, color: Colors.white, marginBottom: 2 },
+  sliderCardDesc: { fontFamily: Fonts.body, fontSize: 13, color: 'rgba(255,255,255,0.9)', lineHeight: 18 },
   sliderCardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   durationBadge: {
     flexDirection: 'row',
@@ -565,8 +683,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   galleryCard: {
-    width: (width - Spacing.lg * 2 - 12) / 2,
-    height: (width - Spacing.lg * 2 - 12) / 2,
+    width: (width - Spacing.lg * 2 - 24) / 3,
+    height: (width - Spacing.lg * 2 - 24) / 3,
     borderRadius: Radius.lg,
     overflow: 'hidden',
     borderWidth: 1,
@@ -585,6 +703,12 @@ const styles = StyleSheet.create({
   },
 
   // Service Card (Menu style matching web)
+  servicesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginTop: 4,
+  },
   serviceCardContainer: { marginBottom: Spacing.md },
   serviceCard: {
     backgroundColor: Colors.surface,
@@ -596,6 +720,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
     shadowRadius: 8,
+    width: (width - Spacing.lg * 2 - 12) / 2,
     elevation: 2,
   },
   serviceCardHeader: { position: 'relative', width: '100%', height: 160 },

@@ -1,6 +1,7 @@
+import { API_BASE } from '@/constants/theme'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
 import * as SecureStore from 'expo-secure-store'
-import { API_BASE } from '@/constants/theme'
 
 export const api = axios.create({
   baseURL: API_BASE,
@@ -29,13 +30,37 @@ export const loginWithGoogle = async (idToken: string) => {
 
 // Services
 export const fetchServices = async () => {
-  const { data } = await api.get('/api/services')
-  return data.services as Service[]
+  try {
+    const { data } = await api.get('/api/services')
+    await AsyncStorage.setItem('cached_services', JSON.stringify(data.services))
+    return data.services as Service[]
+  } catch (error) {
+    const cached = await AsyncStorage.getItem('cached_services')
+    if (cached) {
+      return JSON.parse(cached) as Service[]
+    }
+    throw error
+  }
 }
 
 export const searchServicesWithAi = async (query: string) => {
   const { data } = await api.post('/api/services/search', { query })
   return data.recommendedIds as string[]
+}
+
+export const fetchChatHistory = async () => {
+  const { data } = await api.get('/api/chat/history')
+  return data
+}
+
+export const chatWithAi = async (messages: any[], sessionId?: string, userId?: string, userContext?: any, locale: string = 'en') => {
+  const { data } = await api.post('/api/chat', { messages, sessionId, userId, userContext, locale })
+  return {
+    reply: data.reply as string,
+    suggestedServiceIds: (data.suggestedServiceIds || []) as string[],
+    userInfo: data.userInfo as any,
+    sessionId: data.sessionId as string
+  }
 }
 
 // Settings (public)
@@ -59,6 +84,11 @@ export const fetchMyBookings = async () => {
 
 export const createBooking = async (payload: { serviceId: string; date: string; time: string }) => {
   const { data } = await api.post('/api/mobile/bookings', payload)
+  return data.booking as Booking
+}
+
+export const cancelBooking = async (id: string, reason: string) => {
+  const { data } = await api.post(`/api/mobile/bookings/${id}/cancel`, { reason })
   return data.booking as Booking
 }
 

@@ -1,3 +1,5 @@
+import { useLanguageStore } from '@/store/useLanguageStore';
+import { translations } from '@/lib/i18n';
 import React, { useState } from 'react'
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native'
 import { Colors, Fonts, Spacing, Radius } from '@/constants/theme'
@@ -9,6 +11,8 @@ import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function ProfileScreen() {
+  const { lang } = useLanguageStore()
+  const t = translations[lang]
   const router = useRouter()
   const { user, setAuth, clearAuth, token } = useAuthStore()
   const [name, setName] = useState(user?.name || '')
@@ -21,13 +25,13 @@ export default function ProfileScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Profile</Text>
+          <Text style={styles.headerTitle}>{t.profile}</Text>
         </View>
         <View style={styles.emptyState}>
           <Ionicons name="person-circle-outline" size={72} color={Colors.border} />
           <Text style={styles.emptyTitle}>You're not signed in</Text>
           <TouchableOpacity style={styles.loginBtn} onPress={() => router.push('/(auth)/login')}>
-            <Text style={styles.loginBtnText}>Sign In</Text>
+            <Text style={styles.loginBtnText}>{t.signIn}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
             <Text style={styles.registerLink}>Don't have an account? Register</Text>
@@ -43,7 +47,7 @@ export default function ProfileScreen() {
       const updated = await updateProfile({ name, phone, address })
       await setAuth(updated, token!)
       setIsEditing(false)
-      Alert.alert('Saved', 'Profile updated successfully')
+      Alert.alert('Saved', '{t.profile} updated successfully')
     } catch (e: any) {
       Alert.alert('Error', e?.message || 'Failed to update profile')
     } finally {
@@ -61,7 +65,7 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Profile</Text>
+        <Text style={styles.headerTitle}>{t.profile}</Text>
         <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
           <Text style={styles.editToggle}>{isEditing ? 'Cancel' : 'Edit'}</Text>
         </TouchableOpacity>
