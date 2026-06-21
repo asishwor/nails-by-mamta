@@ -1,9 +1,23 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/utils/prisma'
 import { parse, addMinutes } from 'date-fns'
+import rateLimit from '@/lib/rate-limit'
+
+const bookingRateLimiter = rateLimit({
+  interval: 60 * 60 * 1000, // 1 hour
+  uniqueTokenPerInterval: 500,
+})
 
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1'
+    try {
+      // Limit to 5 bookings per hour per IP
+      await bookingRateLimiter.check(5, ip)
+    } catch {
+      return NextResponse.json({ error: 'Too many booking attempts. Please try again later.' }, { status: 429 })
+    }
+
     const body = await request.json()
     const { name, email, phone, address, serviceId, date, time } = body
 

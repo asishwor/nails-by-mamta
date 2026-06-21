@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to generate response' }, { status: 500 })
     }
 
-    const { reply, suggestedServiceIds, userInfo } = result.object
+    const { reply, suggestedServiceIds, userInfo } = result.object as any
 
     // If we have extracted userInfo and the user is logged in, silently update their profile
     if (userInfo && userId) {

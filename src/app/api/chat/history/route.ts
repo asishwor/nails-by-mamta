@@ -1,10 +1,8 @@
-import { authOptions } from '@/lib/auth'
+import { getUserSession } from '@/lib/session'
 import { prisma } from '@/utils/prisma'
-import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 
 import jwt from 'jsonwebtoken'
-import { NextRequest } from 'next/server'
 
 const SECRET = process.env.NEXTAUTH_SECRET || 'fallback_secret_for_development_change_in_production'
 
@@ -20,9 +18,9 @@ function getUserFromToken(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getUserSession(req)
     const tokenUser = getUserFromToken(req)
-    const userId = session?.user?.id || tokenUser?.id
+    const userId = (session?.user as any)?.id || tokenUser?.id
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -51,9 +49,9 @@ export async function GET(req: Request) {
       content: msg.content
     }))
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       messages: formattedMessages,
-      sessionId: chatSession.id 
+      sessionId: chatSession.id
     })
   } catch (error: any) {
     console.error('Failed to fetch chat history:', error)

@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/utils/prisma'
 import bcrypt from 'bcryptjs'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getUserSession } from '@/lib/session'
 
 export async function PUT(request: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || !session.user?.email || (session.user as any).role !== 'ADMIN') {
+    const session = await getUserSession(request)
+    if (!session || (session.user as any).role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -15,6 +14,10 @@ export async function PUT(request: Request) {
 
     if (!currentPassword || !newPassword) {
       return NextResponse.json({ error: 'Missing passwords' }, { status: 400 })
+    }
+
+    if (!session.user?.email) {
+      return NextResponse.json({ error: 'User email not found' }, { status: 400 })
     }
 
     const user = await prisma.user.findUnique({

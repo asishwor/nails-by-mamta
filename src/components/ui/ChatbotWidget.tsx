@@ -141,7 +141,7 @@ export function ChatbotWidget() {
         body: JSON.stringify({ 
           messages: [...messages, userMsg],
           sessionId,
-          userId: session?.user?.id,
+          userId: (session?.user as any)?.id,
           userContext: isPersonalized ? formData : undefined,
           locale: typeof document !== 'undefined' ? document.documentElement.lang : 'en'
         })
@@ -214,7 +214,7 @@ export function ChatbotWidget() {
     localStorage.setItem('ai_user_info', JSON.stringify(newProfile))
     
     // If logged in, save to database
-    if (session?.user?.id) {
+    if ((session?.user as any)?.id) {
       try {
         await fetch('/api/user/profile', {
           method: 'POST',
@@ -288,14 +288,14 @@ export function ChatbotWidget() {
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-medium">Do you have small children?</label>
-                        <Select value={formData.smallChildren} onValueChange={v => setFormData(f => ({ ...f, smallChildren: v }))}>
+                        <Select value={formData.smallChildren} onValueChange={v => setFormData(f => ({ ...f, smallChildren: v || '' }))}>
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select..." /></SelectTrigger>
                           <SelectContent><SelectItem value="Yes">Yes</SelectItem><SelectItem value="No">No</SelectItem></SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-medium">Do you do heavy household work?</label>
-                        <Select value={formData.householdWork} onValueChange={v => setFormData(f => ({ ...f, householdWork: v }))}>
+                        <Select value={formData.householdWork} onValueChange={v => setFormData(f => ({ ...f, householdWork: v || '' }))}>
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select..." /></SelectTrigger>
                           <SelectContent><SelectItem value="Yes">Yes</SelectItem><SelectItem value="No">No</SelectItem></SelectContent>
                         </Select>
@@ -307,28 +307,28 @@ export function ChatbotWidget() {
                     <div className="space-y-3 animate-in fade-in slide-in-from-right-4">
                       <div className="space-y-1">
                         <label className="text-xs font-medium">Do you type on a computer frequently?</label>
-                        <Select value={formData.typeOnComputer} onValueChange={v => setFormData(f => ({ ...f, typeOnComputer: v }))}>
+                        <Select value={formData.typeOnComputer} onValueChange={v => setFormData(f => ({ ...f, typeOnComputer: v || '' }))}>
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select..." /></SelectTrigger>
                           <SelectContent><SelectItem value="Yes">Yes</SelectItem><SelectItem value="No">No</SelectItem></SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-medium">Do you play any sports?</label>
-                        <Select value={formData.sports} onValueChange={v => setFormData(f => ({ ...f, sports: v }))}>
+                        <Select value={formData.sports} onValueChange={v => setFormData(f => ({ ...f, sports: v || '' }))}>
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select..." /></SelectTrigger>
                           <SelectContent><SelectItem value="Yes">Yes</SelectItem><SelectItem value="No">No</SelectItem></SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-medium">Are you heavy-handed? (Prone to breaking things)</label>
-                        <Select value={formData.heavyHandUsage} onValueChange={v => setFormData(f => ({ ...f, heavyHandUsage: v }))}>
+                        <Select value={formData.heavyHandUsage} onValueChange={v => setFormData(f => ({ ...f, heavyHandUsage: v || '' }))}>
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select..." /></SelectTrigger>
                           <SelectContent><SelectItem value="Yes">Yes</SelectItem><SelectItem value="No">No</SelectItem></SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-medium">Condition of natural nails?</label>
-                        <Select value={formData.naturalNailCondition} onValueChange={v => setFormData(f => ({ ...f, naturalNailCondition: v }))}>
+                        <Select value={formData.naturalNailCondition} onValueChange={v => setFormData(f => ({ ...f, naturalNailCondition: v || '' }))}>
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select..." /></SelectTrigger>
                           <SelectContent><SelectItem value="Strong">Strong</SelectItem><SelectItem value="Weak/Brittle">Weak/Brittle</SelectItem><SelectItem value="Damaged">Damaged</SelectItem></SelectContent>
                         </Select>
@@ -340,21 +340,21 @@ export function ChatbotWidget() {
                     <div className="space-y-3 animate-in fade-in slide-in-from-right-4">
                       <div className="space-y-1">
                         <label className="text-xs font-medium">Comfort vs Fashion?</label>
-                        <Select value={formData.comfortVsFashion} onValueChange={v => setFormData(f => ({ ...f, comfortVsFashion: v }))}>
+                        <Select value={formData.comfortVsFashion} onValueChange={v => setFormData(f => ({ ...f, comfortVsFashion: v || '' }))}>
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select..." /></SelectTrigger>
                           <SelectContent><SelectItem value="Comfort First">Comfort First</SelectItem><SelectItem value="Fashion First">Fashion First</SelectItem><SelectItem value="Balanced">Balanced</SelectItem></SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-medium">Strict workplace rules for nails?</label>
-                        <Select value={formData.workplaceRules} onValueChange={v => setFormData(f => ({ ...f, workplaceRules: v }))}>
+                        <Select value={formData.workplaceRules} onValueChange={v => setFormData(f => ({ ...f, workplaceRules: v || '' }))}>
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select..." /></SelectTrigger>
                           <SelectContent><SelectItem value="Yes (Need Natural/Short)">Yes (Need Natural/Short)</SelectItem><SelectItem value="No Rules">No Rules</SelectItem></SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-medium">How often can you maintain your nails?</label>
-                        <Select value={formData.maintenanceFrequency} onValueChange={v => setFormData(f => ({ ...f, maintenanceFrequency: v }))}>
+                        <Select value={formData.maintenanceFrequency} onValueChange={v => setFormData(f => ({ ...f, maintenanceFrequency: v || '' }))}>
                           <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Select..." /></SelectTrigger>
                           <SelectContent><SelectItem value="Every 2 Weeks">Every 2 Weeks</SelectItem><SelectItem value="Once a Month">Once a Month</SelectItem><SelectItem value="Rarely">Rarely</SelectItem></SelectContent>
                         </Select>

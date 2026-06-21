@@ -6,6 +6,15 @@ export default withAuth(
     const token = req.nextauth.token
     const pathname = req.nextUrl.pathname
 
+    // Location-based blocking for bookings to prevent false bookings
+    if (pathname.startsWith('/api/bookings') && req.method === 'POST') {
+      const country = req.headers.get('x-vercel-ip-country')
+      // Only block if we have a country header and it's not NP (Nepal)
+      if (country && country !== 'NP') {
+        return NextResponse.json({ error: 'Bookings are currently only available from Nepal' }, { status: 403 })
+      }
+    }
+
     if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
       if (token?.role !== 'ADMIN') {
         if (pathname.startsWith('/api')) {
@@ -17,7 +26,14 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ req, token }) => {
+        const pathname = req.nextUrl.pathname
+        // Bookings API does not require admin authentication in middleware
+        if (pathname.startsWith('/api/bookings')) {
+          return true
+        }
+        return !!token
+      },
     },
     pages: {
       signIn: '/login',
@@ -27,5 +43,5 @@ export default withAuth(
 )
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*']
+  matcher: ['/admin/:path*', '/api/admin/:path*', '/api/bookings/:path*']
 }

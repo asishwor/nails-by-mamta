@@ -483,7 +483,10 @@ export default function Home() {
                       </CardContent>
                       <CardFooter className="pt-4 pb-8">
                         <Button
-                          onClick={() => handleBookClick(service)}
+                          onClick={() => {
+                            setSelectedService(service);
+                            setIsModalOpen(true);
+                          }}
                           className="w-full bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-2xl py-6 font-semibold text-base transition-all duration-300"
                         >
                           Book Now

@@ -80,7 +80,7 @@ export function ApiKeyManager() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div className="space-y-2">
             <Label>Provider</Label>
-            <Select value={newProvider} onValueChange={setNewProvider}>
+            <Select value={newProvider} onValueChange={(val) => setNewProvider(val || '')}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/utils/prisma'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getUserSession } from '@/lib/session'
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    if ((session?.user as any)?.role !== 'ADMIN') {
+    const session = await getUserSession(req)
+    if (!session || (session.user as any).role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -21,14 +20,14 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    if ((session?.user as any)?.role !== 'ADMIN') {
+    const session = await getUserSession(req)
+    if (!session || (session.user as any).role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const body = await req.json()
     const { url, altText } = body
 
     if (!url) {
@@ -48,14 +47,14 @@ export async function POST(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
-    if ((session?.user as any)?.role !== 'ADMIN') {
+    const session = await getUserSession(req)
+    if (!session || (session.user as any).role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { searchParams } = new URL(request.url)
+    const { searchParams } = new URL(req.url)
     const id = searchParams.get('id')
 
     if (!id) {

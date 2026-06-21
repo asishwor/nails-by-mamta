@@ -1,9 +1,23 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/utils/prisma'
 import bcrypt from 'bcryptjs'
+import rateLimit from '@/lib/rate-limit'
+
+const registerRateLimiter = rateLimit({
+  interval: 60 * 60 * 1000, // 1 hour
+  uniqueTokenPerInterval: 500,
+})
 
 export async function POST(request: Request) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1'
+    try {
+      // Limit to 3 registrations per hour per IP
+      await registerRateLimiter.check(3, ip)
+    } catch {
+      return NextResponse.json({ error: 'Too many registration attempts. Please try again later.' }, { status: 429 })
+    }
+
     const { email, password, name, phone, address } = await request.json()
 
     if (!email || !password) {

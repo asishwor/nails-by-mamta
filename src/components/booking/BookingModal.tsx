@@ -94,7 +94,7 @@ export function BookingModal({ isOpen, onClose, service }: BookingModalProps) {
     const newProfile = { ...current, ...lifestyleData }
     localStorage.setItem('ai_user_info', JSON.stringify(newProfile))
     
-    if (session?.user?.id) {
+    if ((session?.user as any)?.id) {
       try {
         await fetch('/api/user/profile', {
           method: 'POST',

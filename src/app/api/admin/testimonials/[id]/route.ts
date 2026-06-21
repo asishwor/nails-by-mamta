@@ -1,11 +1,11 @@
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/utils/prisma'
-import { getServerSession } from 'next-auth'
+import { getUserSession } from '@/lib/session'
 import { NextResponse } from 'next/server'
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions)
+    const resolvedParams = await params;
+    const session = await getUserSession(req)
     if (!session || (session.user as any).role !== 'ADMIN') {
       return new NextResponse('Unauthorized', { status: 401 })
     }
@@ -32,14 +32,15 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions)
+    const resolvedParams = await params;
+    const session = await getUserSession(req)
     if (!session || (session.user as any).role !== 'ADMIN') {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const { id } = await params
+    const id = resolvedParams.id
     await prisma.testimonial.delete({
       where: { id }
     })
