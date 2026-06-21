@@ -478,7 +478,7 @@ export default function Home() {
                           {service.durationMinutes} mins
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="flex-grow text-muted-foreground leading-relaxed text-sm">
+                      <CardContent className="grow text-muted-foreground leading-relaxed text-sm">
                         {service.description}
                       </CardContent>
                       <CardFooter className="pt-4 pb-8">
