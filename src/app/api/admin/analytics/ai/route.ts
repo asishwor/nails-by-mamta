@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     }
 
     const prompt = `
-    You are an expert business analyst for a premium nail salon.
+    You are an expert business analyst for a Nails By Mamta - Premium Nail Studio.
     Analyze the following salon dashboard metrics and provide a brief, insightful, 2-3 paragraph summary.
     Highlight any interesting trends, especially regarding guest vs registered users, cancellation rates, or recent booking spikes in the 14-day chart data.
     Be encouraging but professional.

@@ -1,5 +1,5 @@
-import { prisma } from '@/utils/prisma'
 import { safeGenerateObject } from '@/utils/ai-provider'
+import { prisma } from '@/utils/prisma'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       - Comfort vs Fashion: ${userContext.comfortVsFashion || 'Balanced'}
       - Maintenance Frequency: ${userContext.maintenanceFrequency || 'Not specified'}
       - Strict Workplace Rules: ${userContext.workplaceRules || 'No Rules'}
-      
+
       CRITICAL LIFESTYLE INSTRUCTIONS:
       - You MUST strictly factor in their lifestyle (Job, Children, Chores, Typing, Sports) into your recommendation.
       - If they do heavy chores, type a lot, or have small children, recommend short lengths and durable shapes like round or oval. DO NOT recommend long stilettos or coffins.
@@ -39,22 +39,22 @@ export async function POST(request: Request) {
     ` : ''
 
     const systemPrompt = `
-      You are the official Personal Styling Assistant for 'Nails by Mamta', a premium nail salon located in Boudha, Kathmandu.
-      
+      You are the official Personal Styling Assistant for 'Nails by Mamta', a premium nail salon located in Boudha Kumarigal, Kathmandu.
+
       Your personality: Friendly, expert, and strictly focused on nails and salon services.
-      
+
       RULES:
       1. CRITICAL: You must ONLY talk about nails, salon services, and booking. If the user asks general questions, politely decline.
       2. CRITICAL LANGUAGE RULE: You MUST respond entirely in the language corresponding to this locale code: "${locale}". If the locale is "ne", you MUST reply entirely in Nepali. If it is "en", reply in English.
       3. CRITICAL IDENTITY RULE: You MUST NEVER refer to yourself as an "AI", "AI assistant", "bot", or "language model". You are a "Personal Styling Assistant" or "Stylist". Ensure this rule is strictly followed.
       4. Your goal is to help the user find the perfect nail style based on their event, mood, or outfit.
       5. Suggest the names of services they might like from our list.
-      
+
       ${contextSection}
-      
+
       OUR CURRENT SERVICES:
       ${JSON.stringify(services)}
-      
+
       Keep your response concise.
     `
 
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
           })
           activeSessionId = newSession.id
         }
-        
+
         // Save the latest user message
         const lastUserMsg = messages[messages.length - 1]
         if (lastUserMsg.role === 'user') {
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
             }
           })
         }
-        
+
         // Save the assistant response
         await prisma.chatMessage.create({
           data: {
@@ -134,7 +134,7 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       reply,
       suggestedServiceIds,
       userInfo,
